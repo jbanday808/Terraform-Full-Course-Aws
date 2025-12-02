@@ -8,12 +8,12 @@ output "web_server_id" {
 }
 
 output "web_server_public_ip" {
-  description = "Public IP of the web server"
+  description = "Public IP address of the web server"
   value       = aws_instance.web_server.public_ip
 }
 
 output "app_instance_id" {
-  description = "ID of app instance with security group (replace_triggered_by example)"
+  description = "ID of the app instance with security group (replace_triggered_by example)"
   value       = aws_instance.app_with_sg.id
 }
 
@@ -32,22 +32,22 @@ output "critical_bucket_arn" {
 }
 
 output "regional_validation_bucket" {
-  description = "Name of the region-validated bucket (precondition example)"
+  description = "Name of the region-validated S3 bucket (precondition example)"
   value       = aws_s3_bucket.regional_validation.id
 }
 
 output "compliance_bucket_name" {
-  description = "Name of the compliance bucket (postcondition example)"
+  description = "Name of the compliance S3 bucket (postcondition example)"
   value       = aws_s3_bucket.compliance_bucket.id
 }
 
 output "app_bucket_names" {
-  description = "Names of application buckets created with for_each"
+  description = "Names of application S3 buckets created with for_each"
   value       = [for bucket in aws_s3_bucket.app_buckets : bucket.id]
 }
 
 output "app_bucket_arns" {
-  description = "ARNs of application buckets"
+  description = "ARNs of application S3 buckets"
   value       = { for key, bucket in aws_s3_bucket.app_buckets : key => bucket.arn }
 }
 
@@ -61,17 +61,17 @@ output "asg_name" {
 }
 
 output "asg_min_size" {
-  description = "Minimum size of the ASG"
+  description = "Minimum size of the Auto Scaling Group"
   value       = aws_autoscaling_group.app_servers.min_size
 }
 
 output "asg_max_size" {
-  description = "Maximum size of the ASG"
+  description = "Maximum size of the Auto Scaling Group"
   value       = aws_autoscaling_group.app_servers.max_size
 }
 
 output "asg_desired_capacity" {
-  description = "Desired capacity of the ASG (this will be ignored in Terraform after manual changes)"
+  description = "Desired capacity of the Auto Scaling Group (often managed externally)"
   value       = aws_autoscaling_group.app_servers.desired_capacity
 }
 
@@ -108,7 +108,7 @@ output "allowed_regions" {
 # ==============================
 
 output "amazon_linux_ami_id" {
-  description = "ID of the Amazon Linux 2 AMI being used"
+  description = "ID of the Amazon Linux 2 AMI in use"
   value       = data.aws_ami.amazon_linux_2.id
 }
 
