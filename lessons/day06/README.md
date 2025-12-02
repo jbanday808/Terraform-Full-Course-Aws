@@ -44,7 +44,8 @@ project-root/
 ### Task: Reorganize Previous Files
 Using the files from Day 5, divide the configuration into separate files:
 
-
+#### main.tf
+```hcl
 # main.tf
 # Entry point for the Terraform configuration.
 # Core resources are defined in:
@@ -78,7 +79,7 @@ output "vpc_details" {
     vpc_cidr = aws_vpc.main.cidr_block
   }
 }
-
+```
 
 #### backend.tf
 ```hcl
