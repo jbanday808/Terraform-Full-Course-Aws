@@ -1,62 +1,60 @@
 # ==============================================================================
+# Network — VPC and Public Subnet (tuple + set)
+# ==============================================================================
 
-# EC2 Instance - Demonstrating all type constraints
-resource "aws_instance" "web_server" {
-  # String type: AMI ID and instance type
-  ami           = "ami-0e8459476fed2e23b"
-  instance_type = var.instance_type
-  
-  # Number type: Instance count
-  count = var.instance_count
-  
-  # Bool type: Enable monitoring and public IP
-  monitoring                  = var.enable_monitoring
-  associate_public_ip_address = var.associate_public_ip
-  
-  # Set type: Availability zone (using first element from set)
-  availability_zone = tolist(var.availability_zones)[0]  # Need to convert to list to access the indices
-  
-  # List type: Security group
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
-  
-  # Object type: Using server config object attributes
-  # Note: This demonstrates object access syntax
-  # instance_type could also be: var.server_config.instance_type
-  # monitoring could also be: var.server_config.monitoring
-  
-  # Map type: Tags
-  tags = var.instance_tags
-  
-  # Root block device using number type
-  root_block_device {
-    volume_size = var.storage_size
-    volume_type = "gp3"
-  }
+resource "aws_vpc" "main" {
+  cidr_block           = local.vpc_cidr
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-vpc"
+    }
+  )
 }
 
-# Security Group for EC2
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = local.subnet_cidr
+  availability_zone       = tolist(var.availability_zones)[0] # set(string)
+  map_public_ip_on_launch = true
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-public-subnet"
+    }
+  )
+}
+
+# ==============================================================================
+# Security Group — Shows list, tuple, map, object usage
+# ==============================================================================
+
 resource "aws_security_group" "web_sg" {
-  # String type: Name and description
-  name        = "${var.server_config.name}-sg"  # Object type usage
+  name        = "${var.server_config.name}-sg"  # object.name
   description = "Security group for web server"
-  
-  # HTTP access using tuple type (port number from network_config[2])
+  vpc_id      = aws_vpc.main.id
+
+  # HTTP from tuple port (network_config[2])
   ingress {
-    from_port   = var.network_config[2]  # Tuple type: third element (number)
-    to_port     = var.network_config[2]  # Tuple type: third element (number)
+    from_port   = var.network_config[2]
+    to_port     = var.network_config[2]
     protocol    = "tcp"
-    cidr_blocks = var.allowed_cidr_blocks  # List type
+    cidr_blocks = var.allowed_cidr_blocks       # list(string)
   }
-  
-  # SSH access  
+
+  # SSH from same allowed CIDRs
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = var.allowed_cidr_blocks  # List type
+    cidr_blocks = var.allowed_cidr_blocks
   }
-  
-  # Outbound traffic
+
+  # All outbound
   egress {
     from_port   = 0
     to_port     = 0
@@ -64,8 +62,43 @@ resource "aws_security_group" "web_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Map type: Tags
-  tags = var.instance_tags
+  tags = var.instance_tags                     # map(string)
 }
 
+# ==============================================================================
+# EC2 Instance — Pulls together all type constraints
+# ==============================================================================
 
+resource "aws_instance" "web_server" {
+  # String
+  ami           = "ami-0e8459476fed2e23b"
+  instance_type = var.instance_type
+
+  # Number
+  count = var.instance_count
+
+  # Bool
+  monitoring                  = var.enable_monitoring
+  associate_public_ip_address = var.associate_public_ip
+
+  # Set
+  availability_zone = tolist(var.availability_zones)[0]
+
+  # Network
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  # Tags (map + object)
+  tags = merge(
+    var.instance_tags,
+    {
+      Name = local.instance_name
+    }
+  )
+
+  # Number (storage)
+  root_block_device {
+    volume_size = var.storage_size
+    volume_type = "gp3"
+  }
+}
