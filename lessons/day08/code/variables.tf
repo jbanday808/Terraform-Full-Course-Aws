@@ -5,7 +5,7 @@ variable "count_bucket_names" {
   type        = list(string)
   description = "Bucket names for the count example"
   default = [
-    "terraform-count-01-us-east-1"
+    "day08-count-01-us-east-1"
   ]
 }
 
@@ -14,7 +14,7 @@ variable "each_bucket_names" {
   type        = set(string)
   description = "Bucket names for the for_each example"
   default = [
-    "terraform-each-01-us-east-1"
+    "day08-each-01-us-east-1"
   ]
 }
 
