@@ -22,7 +22,8 @@ variable "bucket_names" {
   description = "Set of S3 bucket names to create"
   type        = set(string)
   default = [
-    "day09-demo-lifecycle-001", "day09-demo-lifecycle-002"
+    "day09-demo-lifecycle-001",
+    "day09-demo-lifecycle-002"
   ]
 }
 
