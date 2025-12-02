@@ -8,11 +8,10 @@ terraform {
 }
 
 provider "aws" {
-  # Configuration options
   region = "us-east-1"
 }
 
-# Create a S3 bucket
+# Create an S3 bucket
 resource "aws_s3_bucket" "tf_test_first_bucket" {
   bucket = "day03-test-bucket"
 
