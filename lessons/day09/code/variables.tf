@@ -21,13 +21,22 @@ variable "environment" {
 variable "bucket_names" {
   description = "Set of S3 bucket names to create"
   type        = set(string)
-  default     = ["demo-lifecycle-bucket-001", "demo-lifecycle-bucket-002"]
+  default = [
+    "day09-demo-lifecycle-001", "day09-demo-lifecycle-002"
+  ]
 }
 
 variable "allowed_regions" {
   description = "List of allowed AWS regions"
   type        = list(string)
-  default     = ["us-east-1", "us-west-2", "eu-west-1", "ap-south-1"]
+
+  # Most commonly used AWS regions worldwide
+  default = [
+    "us-east-1",     # N. Virginia
+    "us-west-2",     # Oregon
+    "eu-west-1",     # Ireland
+    "ap-southeast-1" # Singapore
+  ]
 }
 
 # ==============================
@@ -47,7 +56,7 @@ variable "instance_name" {
 }
 
 # ==============================
-# RDS Variables
+# RDS Variables (for demo only)
 # ==============================
 
 variable "db_username" {
@@ -77,6 +86,7 @@ variable "db_name" {
 variable "resource_tags" {
   description = "Common tags to apply to resources"
   type        = map(string)
+
   default = {
     Environment = "dev"
     Team        = "DevOps"
