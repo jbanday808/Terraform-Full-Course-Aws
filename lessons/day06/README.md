@@ -155,9 +155,9 @@ variable "project_name" {
   type        = string
 }
 
-# S3 bucket name used in main.tf (aws_s3_bucket.demo)
+# S3 bucket name used in storage.tf (aws_s3_bucket.main)
 variable "bucket_name" {
-  description = "Name of the S3 bucket to be created by main.tf"
+  description = "Name of the S3 bucket to be created by storage.tf"
   type        = string
 }
 
@@ -204,23 +204,16 @@ locals {
   # VPC name used in vpc.tf
   vpc_name = "${local.name_prefix}-vpc"
 
-  # Auto-generated bucket name (globally unique) used in storage.tf
-  bucket_name = "${local.name_prefix}-${random_id.bucket_suffix.hex}"
-}
-
-# Random suffix to ensure bucket names are globally unique
-resource "random_id" "bucket_suffix" {
-  byte_length = 4
-
-  keepers = {
-    project     = var.project_name
-    environment = var.environment
-  }
+  # S3 bucket name from variable, used in storage.tf
+  bucket_name = var.bucket_name
 }
 ```
 
 #### vpc.tf
 ```hcl
+# vpc.tf
+# VPC and networking resources.
+
 # VPC
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
@@ -399,7 +392,7 @@ project_name = "aws-terraform-course"
 environment  = "dev"
 region       = "us-east-1"
 
-# S3 Bucket (used in main.tf if needed)
+# S3 Bucket (used in storage.tf)
 bucket_name = "aws-terraform-course-demo-bucket"
 
 # Network Configuration
