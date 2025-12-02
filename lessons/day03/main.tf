@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 6.0"
     }
   }
@@ -9,15 +9,15 @@ terraform {
 
 provider "aws" {
   # Configuration options
-    region = "us-east-1"
+  region = "us-east-1"
 }
 
 # Create a S3 bucket
-resource "aws_s3_bucket" "tf_test_baivab_bucket" {
-  bucket = "my-tf-test-baiv-bucket"
+resource "aws_s3_bucket" "tf_test_first_bucket" {
+  bucket = "day03-test-bucket"
 
   tags = {
-    Name        = "My bucket"
+    Name        = "Day 03 Test Bucket"
     Environment = "Dev"
   }
 }
