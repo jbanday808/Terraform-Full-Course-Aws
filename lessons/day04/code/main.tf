@@ -1,42 +1,41 @@
-# Configure the AWS Provider
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
+
+  backend "s3" {
+    bucket         = "tf-state-backend-dev-001"
+    key            = "dev/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform-state-locks"
   }
 }
 
 provider "aws" {
-  # Configuration options
-    region = "ca-central-1"
+  region = "us-east-1"
 }
 
-# backend configuration
-terraform {
-  backend "s3" {
-    bucket         = "erraform-state-1754513244"
-    key            = "dev/terraform.tfstate"
-    region         = "ca-central-1"
-    use_lockfile  = "true"
-    encrypt        = true
-  }
+# Random suffix generator for test bucket
+resource "random_string" "bucket_suffix" {
+  length  = 8
+  special = false
+  upper   = false
 }
 
-
-# Simple test resource to verify remote backend
+# Simple test bucket to verify deployment
 resource "aws_s3_bucket" "test_backend" {
   bucket = "test-remote-backend-${random_string.bucket_suffix.result}"
 
   tags = {
     Name        = "Test Backend Bucket"
-    Environment = "dev"
+    Environment = "Dev"
   }
-}
-
-resource "random_string" "bucket_suffix" {
-  length  = 8
-  special = false
-  upper   = false
 }
