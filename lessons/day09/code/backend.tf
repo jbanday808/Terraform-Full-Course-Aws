@@ -6,25 +6,25 @@
 # Uncomment and configure when you're ready to use remote state
 
 /*
+# backend.tf
+# Store Terraform state remotely in S3 with DynamoDB state locking.
+
 terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
   backend "s3" {
-    # S3 bucket name for storing state
-    bucket = "my-terraform-state-bucket"
-    
-    # Path to state file within the bucket
-    key = "day09/lifecycle-demo/terraform.tfstate"
-    
-    # AWS region where the bucket exists
-    region = "us-east-1"
-    
-    # DynamoDB table for state locking
-    dynamodb_table = "terraform-state-lock"
-    
-    # Enable encryption at rest
-    encrypt = true
-    
-    # Optional: Workspace-based state management
-    # workspace_key_prefix = "workspaces"
+    bucket         = "tf-state-backend-dev-001"  # S3 bucket for remote state
+    key            = "demo/terraform.tfstate"    # Path/key of the state file
+    region         = "us-east-1"                 # Region for S3 & DynamoDB
+    dynamodb_table = "terraform-state-locks"     # Table for state locking
+    encrypt        = true                        # Encrypt state at rest
   }
 }
 */
