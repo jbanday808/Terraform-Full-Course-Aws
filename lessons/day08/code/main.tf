@@ -47,7 +47,7 @@ resource "aws_s3_bucket" "each_buckets" {
 #########################################
 
 resource "aws_s3_bucket" "primary_bucket" {
-  bucket = "day09-primary-01-us-east-1"
+  bucket = "day08-primary-01-us-east-1"
 
   tags = merge(
     local.common_tags,
@@ -58,7 +58,7 @@ resource "aws_s3_bucket" "primary_bucket" {
 }
 
 resource "aws_s3_bucket" "logging_bucket" {
-  bucket = "day09-logging-01-us-east-1"
+  bucket = "day08-logging-01-us-east-1"
 
   # Ensure primary bucket exists first
   depends_on = [aws_s3_bucket.primary_bucket]
@@ -76,7 +76,7 @@ resource "aws_s3_bucket" "logging_bucket" {
 #########################################
 
 resource "aws_s3_bucket" "protected_bucket" {
-  bucket = "day09-protected-01-us-east-1"
+  bucket = "day08-protected-01-us-east-1"
 
   lifecycle {
     create_before_destroy = true   # Replace safely
@@ -97,7 +97,7 @@ resource "aws_s3_bucket" "protected_bucket" {
 
 resource "aws_s3_bucket" "west_bucket" {
   provider = aws.west
-  bucket   = "day09-west-01-us-west-2"
+  bucket   = "day08-west-01-us-west-2"
 
   tags = merge(
     local.common_tags,
@@ -107,6 +107,7 @@ resource "aws_s3_bucket" "west_bucket" {
     }
   )
 }
+
 
 
 
