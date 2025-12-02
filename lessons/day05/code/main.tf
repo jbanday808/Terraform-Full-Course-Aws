@@ -1,6 +1,8 @@
-# Simple S3 Bucket using all three types of variables
+# Reference with var. prefix in main.tf
 resource "aws_s3_bucket" "demo" {
-  bucket = local.full_bucket_name # Local variable (computed)
+  bucket = var.bucket_name # Using input variable
 
-  tags = local.common_tags # Local variable (tags)
+  tags = {
+    Environment = var.environment # Using input variable
+  }
 }
