@@ -1,12 +1,13 @@
 # Input Variables - Values provided to Terraform configuration
+
 variable "environment" {
   description = "Environment name"
   type        = string
-  default     = "staging"
+  default     = "staging"   # Default value (overridden by terraform.tfvars)
 }
 
 variable "bucket_name" {
-  description = "S3 bucket name"
+  description = "Base S3 bucket name"
   type        = string
-  default     = "my-terraform-bucket"
+  default     = "day05-terraform-demo"   # Unique name to avoid AWS conflicts
 }
