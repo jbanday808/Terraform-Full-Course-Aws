@@ -21,9 +21,74 @@ data "aws_ami" "amazon_linux_2" {
 # Get current AWS region
 data "aws_region" "current" {}
 
-# Get availability zones
+# Get availability zones in the current region
 data "aws_availability_zones" "available" {
   state = "available"
+}
+
+# ==============================
+# Networking: Demo VPC for EC2, ASG, and Security Group
+# ==============================
+
+resource "aws_vpc" "demo" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags = merge(
+    var.resource_tags,
+    {
+      Name = "lifecycle-demo-vpc"
+    }
+  )
+}
+
+resource "aws_internet_gateway" "demo" {
+  vpc_id = aws_vpc.demo.id
+
+  tags = merge(
+    var.resource_tags,
+    {
+      Name = "lifecycle-demo-igw"
+    }
+  )
+}
+
+resource "aws_subnet" "public" {
+  count                   = 2
+  vpc_id                  = aws_vpc.demo.id
+  cidr_block              = cidrsubnet(aws_vpc.demo.cidr_block, 8, count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  map_public_ip_on_launch = true
+
+  tags = merge(
+    var.resource_tags,
+    {
+      Name = "lifecycle-demo-public-${count.index}"
+    }
+  )
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.demo.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.demo.id
+  }
+
+  tags = merge(
+    var.resource_tags,
+    {
+      Name = "lifecycle-demo-public-rt"
+    }
+  )
+}
+
+resource "aws_route_table_association" "public" {
+  count          = length(aws_subnet.public)
+  subnet_id      = aws_subnet.public[count.index].id
+  route_table_id = aws_route_table.public.id
 }
 
 # ==============================
@@ -34,6 +99,7 @@ data "aws_availability_zones" "available" {
 resource "aws_instance" "web_server" {
   ami           = data.aws_ami.amazon_linux_2.id
   instance_type = var.instance_type
+  subnet_id     = aws_subnet.public[0].id
 
   tags = merge(
     var.resource_tags,
@@ -43,8 +109,7 @@ resource "aws_instance" "web_server" {
     }
   )
 
-  # Lifecycle Rule: Create new instance before destroying the old one
-  # This ensures zero downtime during instance updates (e.g., changing AMI or instance type)
+  # Lifecycle: create a new instance before destroying the old one
   lifecycle {
     create_before_destroy = true
   }
@@ -52,11 +117,11 @@ resource "aws_instance" "web_server" {
 
 # ==============================
 # Example 2: prevent_destroy
-# Use Case: Critical S3 bucket that should never be accidentally deleted
+# Use Case: Critical S3 bucket that should not be deleted by mistake
 # ==============================
 
 resource "aws_s3_bucket" "critical_data" {
-  bucket = "my-critical-production-data-${var.environment}-${data.aws_region.current.name}"
+  bucket = "day09-demo-lifecycle-001-critical-${var.environment}-${data.aws_region.current.name}"
 
   tags = merge(
     var.resource_tags,
@@ -68,11 +133,9 @@ resource "aws_s3_bucket" "critical_data" {
     }
   )
 
-  # Lifecycle Rule: Prevent accidental deletion of this bucket
-  # Terraform will throw an error if you try to destroy this resource
-  # To delete: Comment out prevent_destroy first, then run terraform apply
+  # Lifecycle: protect this bucket from accidental deletion
   lifecycle {
-    # prevent_destroy = true  # COMMENTED OUT TO ALLOW DESTRUCTION
+    # prevent_destroy = true  # Uncomment in real production to block deletion
   }
 }
 
@@ -110,12 +173,14 @@ resource "aws_launch_template" "app_server" {
 
 # Auto Scaling Group
 resource "aws_autoscaling_group" "app_servers" {
-  name               = "app-servers-asg"
-  min_size           = 1
-  max_size           = 5
-  desired_capacity   = 2
-  health_check_type  = "EC2"
-  availability_zones = data.aws_availability_zones.available.names
+  name              = "app-servers-asg"
+  min_size          = 1
+  max_size          = 5
+  desired_capacity  = 2
+  health_check_type = "EC2"
+
+  # Use subnets in our demo VPC instead of default VPC
+  vpc_zone_identifier = [for subnet in aws_subnet.public : subnet.id]
 
   launch_template {
     id      = aws_launch_template.app_server.id
@@ -134,24 +199,22 @@ resource "aws_autoscaling_group" "app_servers" {
     propagate_at_launch = false
   }
 
-  # Lifecycle Rule: Ignore changes to desired_capacity
-  # This is useful when auto-scaling policies or external systems modify capacity
-  # Terraform won't try to revert capacity changes made outside of Terraform
+  # Lifecycle: ignore desired_capacity changes made by auto-scaling
   lifecycle {
     ignore_changes = [
       desired_capacity,
-      # Also ignore load_balancers if added later by other processes
+      # load_balancers, # Uncomment if external tools attach load balancers
     ]
   }
 }
 
 # ==============================
 # Example 4: precondition
-# Use Case: Ensure we're deploying in an allowed region
+# Use Case: Ensure we deploy only in allowed regions
 # ==============================
 
 resource "aws_s3_bucket" "regional_validation" {
-  bucket = "validated-region-bucket-${var.environment}-${data.aws_region.current.name}"
+  bucket = "day09-demo-lifecycle-001-validated-${var.environment}-${data.aws_region.current.name}"
 
   tags = merge(
     var.resource_tags,
@@ -161,8 +224,7 @@ resource "aws_s3_bucket" "regional_validation" {
     }
   )
 
-  # Lifecycle Rule: Validate region before creating resource
-  # This prevents resource creation in unauthorized regions
+  # Lifecycle: validate region before creating the bucket
   lifecycle {
     precondition {
       condition     = contains(var.allowed_regions, data.aws_region.current.name)
@@ -177,7 +239,7 @@ resource "aws_s3_bucket" "regional_validation" {
 # ==============================
 
 resource "aws_s3_bucket" "compliance_bucket" {
-  bucket = "compliance-bucket-${var.environment}-${data.aws_region.current.name}"
+  bucket = "day09-demo-lifecycle-001-compliance-${var.environment}-${data.aws_region.current.name}"
 
   tags = merge(
     var.resource_tags,
@@ -188,8 +250,7 @@ resource "aws_s3_bucket" "compliance_bucket" {
     }
   )
 
-  # Lifecycle Rule: Validate bucket has required tags after creation
-  # This ensures compliance with organizational tagging policies
+  # Lifecycle: verify required tags exist after bucket creation
   lifecycle {
     postcondition {
       condition     = contains(keys(self.tags), "Compliance")
@@ -212,6 +273,7 @@ resource "aws_s3_bucket" "compliance_bucket" {
 resource "aws_security_group" "app_sg" {
   name        = "app-security-group"
   description = "Security group for application servers"
+  vpc_id      = aws_vpc.demo.id
 
   ingress {
     from_port   = 80
@@ -250,6 +312,7 @@ resource "aws_security_group" "app_sg" {
 resource "aws_instance" "app_with_sg" {
   ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = var.instance_type
+  subnet_id              = aws_subnet.public[0].id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
 
   tags = merge(
@@ -260,8 +323,7 @@ resource "aws_instance" "app_with_sg" {
     }
   )
 
-  # Lifecycle Rule: Replace instance when security group changes
-  # This ensures the instance is recreated with new security rules
+  # Lifecycle: replace instance when security group changes
   lifecycle {
     replace_triggered_by = [
       aws_security_group.app_sg.id
@@ -277,7 +339,7 @@ resource "aws_instance" "app_with_sg" {
 resource "aws_s3_bucket" "app_buckets" {
   for_each = var.bucket_names
 
-  bucket = "${each.value}-${var.environment}"
+  bucket = "${each.value}-${var.environment}-${data.aws_region.current.name}"
 
   tags = merge(
     var.resource_tags,
@@ -288,24 +350,19 @@ resource "aws_s3_bucket" "app_buckets" {
     }
   )
 
-  # Lifecycle Rule: Create new bucket before destroying old one
-  # Useful when renaming buckets or migrating data
+  # Lifecycle: create new bucket before destroying the old one
   lifecycle {
     create_before_destroy = true
     ignore_changes = [
-      # Ignore ACL changes if managed by another process
-      # acl,
+      # acl, # Uncomment if ACLs are managed elsewhere
     ]
   }
 }
 
 # ==============================
 # Example 8: Combining Multiple Lifecycle Rules
-# Use Case: DynamoDB table with comprehensive protections (SIMPLE EXAMPLE)
+# Use Case: DynamoDB table with comprehensive protections
 # ==============================
-
-# This example shows how to combine multiple lifecycle rules on a single resource
-# DynamoDB is used here because it's simple and doesn't require VPC setup
 
 resource "aws_dynamodb_table" "critical_app_data" {
   name         = "${var.environment}-app-data-table"
@@ -327,43 +384,30 @@ resource "aws_dynamodb_table" "critical_app_data" {
     }
   )
 
-  # Multiple Lifecycle Rules Combined for Production Protection
+  # Multiple lifecycle rules combined for protection and validation
   lifecycle {
-    # Rule 1: Prevent accidental deletion
-    # This protects the table from being destroyed accidentally
-    # prevent_destroy = true  # COMMENTED OUT TO ALLOW DESTRUCTION
+    # Protect from accidental deletion (enable in real prod)
+    # prevent_destroy = true
 
-    # Rule 2: Create new resource before destroying old one
-    # Ensures zero downtime if table needs to be recreated
+    # Zero-downtime recreation if needed
     create_before_destroy = true
 
-    # Rule 3: Ignore changes to certain attributes
-    # Allow AWS to manage read/write capacity for auto-scaling
+    # Allow AWS to manage capacity if using auto-scaling
     ignore_changes = [
-      # Ignore read/write capacity if using auto-scaling
       # read_capacity,
       # write_capacity,
     ]
 
-    # Rule 4: Validate before creation
+    # Validate tags before creation
     precondition {
       condition     = contains(keys(var.resource_tags), "Environment")
       error_message = "Critical table must have Environment tag for compliance!"
     }
 
-    # Rule 5: Validate after creation
+    # Validate billing mode after creation
     postcondition {
       condition     = self.billing_mode == "PAY_PER_REQUEST" || self.billing_mode == "PROVISIONED"
       error_message = "Billing mode must be either PAY_PER_REQUEST or PROVISIONED!"
     }
   }
 }
-
-# ==============================
-# Note: RDS Example (Too Complex for Simple Demo)
-# ==============================
-# RDS requires VPC, subnets, security groups, etc.
-# For a simple lifecycle demo, the above DynamoDB example is better
-# If you need RDS lifecycle examples, set up VPC resources first
-# 
-# See the documentation for production RDS patterns with lifecycle rules
