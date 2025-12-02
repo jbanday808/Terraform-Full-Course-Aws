@@ -3,7 +3,7 @@
 # ==============================
 
 locals {
-  # Common tags that will be merged with resource-specific tags
+  # Common tags applied to all resources
   common_tags = {
     Environment = var.environment
     Team        = "DevOps"
@@ -30,15 +30,15 @@ locals {
     }
   }
 
-  # Get configuration for current environment
+  # Configuration selected by environment (dev/staging/prod)
   current_env_config = lookup(local.env_config, var.environment, local.env_config["dev"])
 
-  # Bucket naming convention
+  # Bucket naming prefix
   bucket_prefix = "${var.environment}-lifecycle-demo"
 
-  # Formatted region name for bucket naming
+  # Region formatting for names (e.g., us-east-1 → useast1)
   region_short = replace(data.aws_region.current.name, "-", "")
 
-  # Availability zones count
+  # Number of availability zones in current region
   az_count = length(data.aws_availability_zones.available.names)
 }
