@@ -33,8 +33,8 @@ locals {
   # Configuration selected by environment (dev/staging/prod)
   current_env_config = lookup(local.env_config, var.environment, local.env_config["dev"])
 
-  # Bucket naming prefix
-  bucket_prefix = "${var.environment}-lifecycle-demo"
+  # Updated bucket naming prefix to match new lifecycle demo naming
+  bucket_prefix = "day09-demo-lifecycle-001"
 
   # Region formatting for names (e.g., us-east-1 → useast1)
   region_short = replace(data.aws_region.current.name, "-", "")
