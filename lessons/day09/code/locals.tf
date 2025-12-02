@@ -33,7 +33,7 @@ locals {
   # Configuration selected by environment (dev/staging/prod)
   current_env_config = lookup(local.env_config, var.environment, local.env_config["dev"])
 
-  # Updated bucket naming prefix to match new lifecycle demo naming
+  # Bucket naming prefix (aligned with demo naming)
   bucket_prefix = "day09-demo-lifecycle-001"
 
   # Region formatting for names (e.g., us-east-1 → useast1)
