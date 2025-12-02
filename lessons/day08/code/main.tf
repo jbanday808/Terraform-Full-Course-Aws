@@ -6,106 +6,107 @@
 # 2. for_each - Creates multiple instances using map/set iteration
 # =============================================================================
 
-# -----------------------------------------------------------------------------
-# Example 1: Using COUNT meta-argument with S3 buckets
-# -----------------------------------------------------------------------------
-# count is useful when you want to create multiple identical resources
-# Access individual instances using count.index
+# main.tf
 
-resource "aws_s3_bucket" "example_count" {
-  count = length(var.s3_bucket_names)
+#########################################
+# 1. COUNT – create buckets by index
+#########################################
 
-  bucket = var.s3_bucket_names[count.index]
+resource "aws_s3_bucket" "count_buckets" {
+  count  = length(var.count_bucket_names)
+  bucket = var.count_bucket_names[count.index]
 
-  tags = {
-    Name        = var.s3_bucket_names[count.index]
-    Environment = var.environment
-    Index       = count.index
-    ManagedBy   = "terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Example = "count"
+      Index   = tostring(count.index)
+    }
+  )
 }
 
-# -----------------------------------------------------------------------------
-# Example 2: Using FOR_EACH meta-argument with S3 buckets
-# -----------------------------------------------------------------------------
-# for_each is useful when you want to create resources from a map or set
-# Access individual instances using each.key and each.value
-# Note: for_each requires a map or set, not a list
+#########################################
+# 2. FOR_EACH – create buckets by name
+#########################################
 
-resource "aws_s3_bucket" "example_foreach" {
-  for_each = var.s3_bucket_set
+resource "aws_s3_bucket" "each_buckets" {
+  for_each = var.each_bucket_names
+  bucket   = each.value
 
-  bucket = each.value
-
-  tags = {
-    Name        = each.value
-    Environment = var.environment
-    BucketType  = "foreach-example"
-    ManagedBy   = "terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Example = "for_each"
+      Key     = each.key
+    }
+  )
 }
 
-# -----------------------------------------------------------------------------
-# Example 3: DEPENDS_ON meta-argument
-# -----------------------------------------------------------------------------
-# depends_on is used to explicitly specify dependencies between resources
-# Terraform automatically handles most dependencies, but sometimes you need explicit control
+#########################################
+# 3. DEPENDS_ON – explicit dependency
+#########################################
 
-# First, create a bucket that will be used as a dependency
-resource "aws_s3_bucket" "primary" {
-  bucket = "tf-day08-primary-${var.environment}-20251017"
+resource "aws_s3_bucket" "primary_bucket" {
+  bucket = "terraform-primary-01-us-east-1"
 
-  tags = {
-    Name        = "Primary Bucket"
-    Environment = var.environment
-    ManagedBy   = "terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Role = "primary"
+    }
+  )
 }
 
-# This bucket explicitly depends on the primary bucket
-resource "aws_s3_bucket" "dependent" {
-  bucket = "tf-day08-dependent-${var.environment}-20251017"
+resource "aws_s3_bucket" "logging_bucket" {
+  bucket = "terraform-logging-01-us-east-1"
 
-  # Explicit dependency - this will be created AFTER primary bucket
-  depends_on = [aws_s3_bucket.primary]
+  # Ensure primary bucket exists first
+  depends_on = [aws_s3_bucket.primary_bucket]
 
-  tags = {
-    Name        = "Dependent Bucket"
-    Environment = var.environment
-    DependsOn   = "primary-bucket"
-    ManagedBy   = "terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Role = "logging"
+    }
+  )
 }
 
-# -----------------------------------------------------------------------------
-# Example 4: LIFECYCLE meta-argument
-# -----------------------------------------------------------------------------
-# lifecycle controls how Terraform handles resource creation/destruction
-# Common use cases: prevent_destroy, create_before_destroy, ignore_changes
+#########################################
+# 4. LIFECYCLE – safe, but destroy allowed
+#########################################
 
-resource "aws_s3_bucket" "lifecycle_example" {
-  bucket = "tf-day08-lifecycle-${var.environment}-20251017"
+resource "aws_s3_bucket" "protected_bucket" {
+  bucket = "terraform-protected-01-us-east-1"
 
-  # Lifecycle rules
   lifecycle {
-    # Prevent accidental deletion
-    prevent_destroy = false # Set to true in production to protect critical resources
-
-    # Create new resource before destroying old one
-    create_before_destroy = true
-
-    # Ignore changes to specific attributes
-    ignore_changes = [
-      tags["CreatedDate"], # Ignore changes to this specific tag
-    ]
+    create_before_destroy = true   # Replace safely
+    ignore_changes        = [tags] # Ignore tag-only updates
   }
 
-  tags = {
-    Name        = "Lifecycle Example"
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    CreatedDate = "2025-10-17"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Critical = "true"
+    }
+  )
 }
+
+#########################################
+# 5. PROVIDER – create bucket in us-west-2
+#########################################
+
+resource "aws_s3_bucket" "west_bucket" {
+  provider = aws.west
+  bucket   = "terraform-west-01-us-west-2"
+
+  tags = merge(
+    local.common_tags,
+    {
+      Region = "us-west-2"
+      Note   = "Created with provider alias"
+    }
+  )
+}
+
 
 
