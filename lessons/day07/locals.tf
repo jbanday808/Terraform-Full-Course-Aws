@@ -1,5 +1,5 @@
 locals {
-  # Common tags to apply to all resources
+  # Shared tags for all resources
   common_tags = {
     Environment = var.environment
     ManagedBy   = "Terraform"
@@ -8,14 +8,14 @@ locals {
     CreatedDate = formatdate("YYYY-MM-DD", timestamp())
   }
 
-  # Network configuration from tuple
-  vpc_cidr    = element(var.network_config, 0)
-  subnet_cidr = "${element(var.network_config, 1)}/${element(var.network_config, 2)}"
+  # Network settings from tuple
+  vpc_cidr    = var.network_config[0]
+  subnet_cidr = var.network_config[1]
 
-  # Instance configuration
-  instance_name = "${var.environment}-instance"
+  # EC2 name from object
+  instance_name = "${var.server_config.name}-instance"
 
-  # Security group ports as map
+  # Well-known ports (map)
   port_description = {
     22  = "SSH"
     80  = "HTTP"
