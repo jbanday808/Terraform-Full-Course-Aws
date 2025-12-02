@@ -44,27 +44,62 @@ project-root/
 ### Task: Reorganize Previous Files
 Using the files from Day 5, divide the configuration into separate files:
 
+
+# main.tf
+# Entry point for the Terraform configuration.
+# Core resources are defined in:
+# - vpc.tf      (VPC and networking)
+# - storage.tf  (S3 bucket and related config)
+
+# High-level project info
+output "project_info" {
+  description = "Project, environment, and region information"
+  value = {
+    project_name = var.project_name
+    environment  = var.environment
+    region       = var.region
+  }
+}
+
+# Reference the S3 bucket created in storage.tf (aws_s3_bucket.main)
+output "bucket_details" {
+  description = "Details of the primary S3 bucket"
+  value = {
+    bucket_name = aws_s3_bucket.main.bucket
+    bucket_arn  = aws_s3_bucket.main.arn
+  }
+}
+
+# Reference the VPC created in vpc.tf (aws_vpc.main)
+output "vpc_details" {
+  description = "Details of the deployed VPC"
+  value = {
+    vpc_id   = aws_vpc.main.id
+    vpc_cidr = aws_vpc.main.cidr_block
+  }
+}
+
+
 #### backend.tf
 ```hcl
+# backend.tf
+# Stores Terraform state in a remote S3 bucket and uses DynamoDB for locking.
+
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.1"
-    }
   }
 
   backend "s3" {
-    bucket         = "your-terraform-state-bucket"
-    key            = "dev/terraform.tfstate"
+    bucket         = "tf-state-backend-dev-001"
+    key            = "demo/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "terraform-state-lock"
+    dynamodb_table = "terraform-state-locks"
     encrypt        = true
   }
 }
@@ -72,58 +107,81 @@ terraform {
 
 #### provider.tf
 ```hcl
+# provider.tf
+# AWS provider configuration with safe, static default tags.
+
 provider "aws" {
   region = var.region
 
+  # Default tags applied to every AWS resource
   default_tags {
-    tags = local.common_tags
+    tags = {
+      Environment = var.environment
+      Project     = var.project_name
+      ManagedBy   = "Terraform"
+    }
   }
 }
 ```
 
 #### variables.tf
 ```hcl
+# variables.tf
+# Defines all input values used across the configuration.
+
+# Environment (dev, staging, production)
 variable "environment" {
   description = "Environment name (dev, staging, production)"
   type        = string
   default     = "staging"
-  
+
   validation {
     condition     = contains(["dev", "staging", "production"], var.environment)
     error_message = "Environment must be dev, staging, or production."
   }
 }
 
+# AWS Region (used by provider.tf)
 variable "region" {
-  description = "AWS region for resources"
+  description = "AWS region for all resources"
   type        = string
   default     = "us-east-1"
 }
 
+# Project name for tagging and naming
 variable "project_name" {
   description = "Name of the project"
   type        = string
 }
 
+# S3 bucket name used in main.tf (aws_s3_bucket.demo)
+variable "bucket_name" {
+  description = "Name of the S3 bucket to be created by main.tf"
+  type        = string
+}
+
+# VPC CIDR used in vpc.tf
 variable "vpc_cidr" {
-  description = "CIDR block for VPC"
+  description = "CIDR block for the VPC"
   type        = string
   default     = "10.0.0.0/16"
-  
+
   validation {
     condition     = can(cidrhost(var.vpc_cidr, 0))
     error_message = "VPC CIDR must be a valid IPv4 CIDR block."
   }
 }
 
+# Availability Zones used for public subnets in vpc.tf
 variable "availability_zones" {
   description = "List of availability zones"
   type        = list(string)
   default     = ["us-east-1a", "us-east-1b"]
 }
 
+# Optional tags applied to all resources
 variable "tags" {
-  description = "Additional tags to apply to resources"
+  description = "Additional tags applied to resources"
   type        = map(string)
   default     = {}
 }
@@ -131,29 +189,28 @@ variable "tags" {
 
 #### locals.tf
 ```hcl
-locals {
-  # Common tags applied to all resources
-  common_tags = merge(var.tags, {
-    Environment   = var.environment
-    Project       = var.project_name
-    ManagedBy     = "Terraform"
-    CreatedDate   = formatdate("YYYY-MM-DD", timestamp())
-  })
+# locals.tf
+# Reusable naming rules and team-specific tags.
 
-  # Naming convention
+locals {
+  # Team / org tags only (from terraform.tfvars)
+  # Environment / Project / ManagedBy now come from provider default_tags
+  common_tags = var.tags
+
+  # Standard naming pattern: project-environment
   name_prefix = "${var.project_name}-${var.environment}"
-  
-  # Network configuration
+
+  # VPC name used in vpc.tf
   vpc_name = "${local.name_prefix}-vpc"
-  
-  # Storage configuration  
+
+  # Auto-generated bucket name (globally unique) used in storage.tf
   bucket_name = "${local.name_prefix}-${random_id.bucket_suffix.hex}"
 }
 
-# Random suffix for globally unique names
+# Random suffix to ensure bucket names are globally unique
 resource "random_id" "bucket_suffix" {
   byte_length = 4
-  
+
   keepers = {
     project     = var.project_name
     environment = var.environment
@@ -223,6 +280,9 @@ resource "aws_route_table_association" "public" {
 
 #### storage.tf
 ```hcl
+# storage.tf
+# S3 bucket with versioning, encryption, and strict public access controls.
+
 # S3 Bucket
 resource "aws_s3_bucket" "main" {
   bucket = local.bucket_name
@@ -237,7 +297,7 @@ resource "aws_s3_bucket" "main" {
 # S3 Bucket Versioning
 resource "aws_s3_bucket_versioning" "main" {
   bucket = aws_s3_bucket.main.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -268,6 +328,9 @@ resource "aws_s3_bucket_public_access_block" "main" {
 
 #### outputs.tf
 ```hcl
+# outputs.tf
+# Key outputs for VPC, Subnets, S3, and Environment details.
+
 # VPC Outputs
 output "vpc_id" {
   description = "ID of the VPC"
@@ -323,7 +386,7 @@ output "region" {
 }
 
 output "common_tags" {
-  description = "Common tags applied to resources"
+  description = "Common tags applied to all resources"
   value       = local.common_tags
 }
 ```
@@ -332,19 +395,22 @@ output "common_tags" {
 ```hcl
 # Project Configuration
 project_name = "aws-terraform-course"
-environment  = "demo"
+environment  = "dev"
 region       = "us-east-1"
 
+# S3 Bucket (used in main.tf if needed)
+bucket_name = "aws-terraform-course-demo-bucket"
+
 # Network Configuration
-vpc_cidr          = "10.0.0.0/16"
+vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
-# Tags
+# Optional Resource Tags
 tags = {
-  Owner       = "DevOps-Team"
-  Department  = "Engineering"
-  CostCenter  = "Engineering-001"
-  Project     = "TerraformLearning"
+  Owner      = "DevOps-Team"
+  Department = "Engineering"
+  CostCenter = "Engineering-001"
+  Project    = "TerraformLearning"
 }
 ```
 
