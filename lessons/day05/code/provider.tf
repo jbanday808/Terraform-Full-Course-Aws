@@ -1,4 +1,3 @@
-
 terraform {
   required_providers {
     aws = {
@@ -14,5 +13,5 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1" # Simple hardcoded region for demo
+  region = "us-east-1" # force Terraform to use us-east-1
 }
