@@ -1,5 +1,5 @@
 variable "aws_region" {
-  description = "AWS region for resources (default: us-east-1)"
+  description = "AWS region for resources (default: us-east-1)."
   type        = string
   default     = "us-east-1"
 
@@ -10,7 +10,7 @@ variable "aws_region" {
 }
 
 variable "environment" {
-  description = "Environment name (dev or prod)"
+  description = "Environment name (dev or prod)."
   type        = string
   default     = "dev"
 
@@ -21,7 +21,7 @@ variable "environment" {
 }
 
 variable "instance_count" {
-  description = "Number of EC2 instances to create"
+  description = "Number of EC2 instances to create."
   type        = number
   default     = 2
 
@@ -32,17 +32,19 @@ variable "instance_count" {
 }
 
 variable "vpc_id" {
-  description = "VPC ID where resources will be created (e.g., vpc-0123456789abcdef0)"
+  description = "Existing VPC ID to use (leave null to use the demo VPC created by this config)."
   type        = string
+  default     = null
 }
 
 variable "subnet_id" {
-  description = "Subnet ID for EC2 instances (must belong to vpc_id)"
+  description = "Existing subnet ID to use (leave null to use the demo subnet created by this config)."
   type        = string
+  default     = null
 }
 
 variable "ingress_rules" {
-  description = "List of ingress rules for the security group"
+  description = "List of ingress rules for the security group."
   type = list(object({
     from_port   = number
     to_port     = number
