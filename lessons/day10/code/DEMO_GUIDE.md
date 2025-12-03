@@ -129,7 +129,7 @@ terraform init
    ```bash
    terraform apply -auto-approve
    ```
-   Note: Terraform dynamically adds the new rule
+   **Note:** Terraform dynamically adds the new rule
 
 8. **Cleanup**:
    ```bash
