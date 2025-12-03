@@ -1,23 +1,38 @@
 variable "aws_region" {
-  description = "AWS region for resources"
+  description = "AWS region for resources (default: us-east-1)"
   type        = string
   default     = "us-east-1"
+
+  validation {
+    condition     = contains(["us-east-1", "us-west-2", "eu-west-1"], var.aws_region)
+    error_message = "aws_region must be one of: us-east-1, us-west-2, eu-west-1."
+  }
 }
 
 variable "environment" {
   description = "Environment name (dev or prod)"
   type        = string
   default     = "dev"
+
+  validation {
+    condition     = contains(["dev", "prod"], var.environment)
+    error_message = "environment must be either dev or prod."
+  }
 }
 
 variable "instance_count" {
   description = "Number of EC2 instances to create"
   type        = number
   default     = 2
+
+  validation {
+    condition     = var.instance_count >= 1 && var.instance_count <= 10
+    error_message = "instance_count must be between 1 and 10."
+  }
 }
 
 variable "ingress_rules" {
-  description = "List of ingress rules for security group"
+  description = "List of ingress rules for the security group"
   type = list(object({
     from_port   = number
     to_port     = number
@@ -25,6 +40,7 @@ variable "ingress_rules" {
     cidr_blocks = list(string)
     description = string
   }))
+
   default = [
     {
       from_port   = 80
