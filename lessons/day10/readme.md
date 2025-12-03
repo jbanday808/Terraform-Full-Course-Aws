@@ -119,6 +119,7 @@ dynamic "block_name" {
 5. Avoid nesting dynamic blocks too deeply
    
 **NEW: Coalesce Function**
+
 **What it does:** Coalesce chooses the first value that isn’t empty and ignores the rest.
 **Syntax:**
 ```hcl
@@ -134,6 +135,7 @@ coalesce(value1, value2, value3)
 - ✅ Using defaults when none are provided
 - ✅ Cleaner configs with automatic fallbacks
 - ✅ Making modules easier to reuse
+  
 ---
 
 ### 3. Splat Expressions
