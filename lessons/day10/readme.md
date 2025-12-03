@@ -117,7 +117,23 @@ dynamic "block_name" {
 3. Document the expected data structure
 4. Validate input variables
 5. Avoid nesting dynamic blocks too deeply
+   
+**NEW: Coalesce Function**
+**What it does:** Coalesce chooses the first value that isn’t empty and ignores the rest.
+**Syntax:**
+```hcl
+coalesce(value1, value2, value3)
+```
+**How it works:**
+- Checks value1 → if it’s not empty, uses it
+- If value1 is empty or null → tries value2
+- If value2 is empty → tries value3
 
+**Use Cases:**
+- ✅ Optional user-provided values
+- ✅ Using defaults when none are provided
+- ✅ Cleaner configs with automatic fallbacks
+- ✅ Making modules easier to reuse
 ---
 
 ### 3. Splat Expressions
