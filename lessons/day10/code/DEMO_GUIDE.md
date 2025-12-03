@@ -239,7 +239,6 @@ outputs.tf: ❌ Example 1 & 2 commented, ✅ Example 3 outputs uncommented
 **Error: Output refers to sensitive values**
 - This is normal for some AWS attributes, just note it
 
-**Want to run all examples together?**
-- Uncomment all three examples at once
-- Uncomment all outputs
-- Run `terraform apply`
+**Want to run all demos together?**
+- Uncomment all examples and outputs, then: **terraform apply**
+
