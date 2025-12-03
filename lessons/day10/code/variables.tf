@@ -31,6 +31,16 @@ variable "instance_count" {
   }
 }
 
+variable "vpc_id" {
+  description = "VPC ID where resources will be created (e.g., vpc-0123456789abcdef0)"
+  type        = string
+}
+
+variable "subnet_id" {
+  description = "Subnet ID for EC2 instances (must belong to vpc_id)"
+  type        = string
+}
+
 variable "ingress_rules" {
   description = "List of ingress rules for the security group"
   type = list(object({
