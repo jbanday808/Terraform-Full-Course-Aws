@@ -118,7 +118,7 @@ dynamic "block_name" {
 4. Validate input variables
 5. Avoid nesting dynamic blocks too deeply
    
-**NEW: Coalesce Function**
+### Coalesce Function
 
 **What it does:** Coalesce chooses the first value that isn’t empty and ignores the rest.
 **Syntax:**
