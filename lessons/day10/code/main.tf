@@ -1,8 +1,12 @@
 ############################################
-# Day 10 – Conditionals, Dynamic, and Splat
+# Day 10 – Terraform Expressions Demo
+# Conditional, Dynamic, and Splat Examples
 ############################################
 
-# Common Amazon Linux 2 AMI (latest)
+############################################
+# Data Source – Latest Amazon Linux 2 AMI
+############################################
+
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -14,7 +18,7 @@ data "aws_ami" "amazon_linux" {
 }
 
 ############################################
-# Example 1 – Conditional Expressions
+# Example 1 – Conditional Expression
 ############################################
 
 resource "aws_instance" "conditional_example" {
@@ -24,6 +28,7 @@ resource "aws_instance" "conditional_example" {
   tags = {
     Name        = "conditional-${var.environment}"
     Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
@@ -35,6 +40,7 @@ resource "aws_security_group" "dynamic_sg" {
   name        = "dynamic-sg-${var.environment}"
   description = "Security group with dynamic ingress rules"
 
+  # Dynamic ingress rules pulled from var.ingress_rules
   dynamic "ingress" {
     for_each = var.ingress_rules
     content {
@@ -46,6 +52,7 @@ resource "aws_security_group" "dynamic_sg" {
     }
   }
 
+  # Allow all outbound by default
   egress {
     from_port   = 0
     to_port     = 0
@@ -56,6 +63,7 @@ resource "aws_security_group" "dynamic_sg" {
   tags = {
     Name        = "dynamic-sg-${var.environment}"
     Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
@@ -73,22 +81,49 @@ resource "aws_instance" "splat_example" {
   tags = {
     Name        = "splat-${count.index + 1}"
     Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
-# Locals using splat expressions
+############################################
+# Locals – Splat Extracted Values
+############################################
+
 locals {
   all_instance_ids = aws_instance.splat_example[*].id
   all_private_ips  = aws_instance.splat_example[*].private_ip
 }
 
-# Outputs so you can see splat results after apply
+############################################
+# Outputs
+############################################
+
+output "conditional_instance_type" {
+  description = "Instance type selected using conditional expression."
+  value       = aws_instance.conditional_example.instance_type
+}
+
+output "conditional_instance_id" {
+  description = "EC2 instance ID created by the conditional example."
+  value       = aws_instance.conditional_example.id
+}
+
+output "dynamic_security_group_id" {
+  description = "Security group ID created with dynamic ingress rules."
+  value       = aws_security_group.dynamic_sg.id
+}
+
+output "dynamic_security_group_rules_count" {
+  description = "Total number of dynamic ingress rules."
+  value       = length(var.ingress_rules)
+}
+
 output "splat_instance_ids" {
-  description = "All instance IDs from splat_example"
+  description = "All EC2 instance IDs using splat expression."
   value       = local.all_instance_ids
 }
 
 output "splat_private_ips" {
-  description = "All private IPs from splat_example"
+  description = "All private IPs using splat expression."
   value       = local.all_private_ips
 }
