@@ -25,8 +25,13 @@ resource "aws_instance" "conditional_example" {
   ami           = data.aws_ami.amazon_linux.id
   instance_type = var.environment == "prod" ? "t3.large" : "t2.micro"
 
+  # Use existing subnet if provided, otherwise the demo subnet
+  subnet_id              = coalesce(var.subnet_id, aws_subnet.public.id)
+  vpc_security_group_ids = [aws_security_group.dynamic_sg.id]
+
   tags = {
-    Name = "conditional-${var.environment}"
+    Name        = "conditional-${var.environment}"
+    Environment = var.environment
   }
 }
 
@@ -37,6 +42,9 @@ resource "aws_instance" "conditional_example" {
 resource "aws_security_group" "dynamic_sg" {
   name        = "dynamic-sg-${var.environment}"
   description = "Security group with dynamic ingress rules"
+
+  # Use existing VPC if provided, otherwise the demo VPC
+  vpc_id = coalesce(var.vpc_id, aws_vpc.demo.id)
 
   # Dynamic ingress rules pulled from var.ingress_rules
   dynamic "ingress" {
@@ -59,7 +67,8 @@ resource "aws_security_group" "dynamic_sg" {
   }
 
   tags = {
-    Name = "dynamic-sg-${var.environment}"
+    Name        = "dynamic-sg-${var.environment}"
+    Environment = var.environment
   }
 }
 
@@ -70,12 +79,16 @@ resource "aws_security_group" "dynamic_sg" {
 resource "aws_instance" "splat_example" {
   count = var.instance_count
 
-  ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = "t2.micro"
+  ami           = data.aws_ami.amazon_linux.id
+  instance_type = "t2.micro"
+
+  # Use existing subnet if provided, otherwise the demo subnet
+  subnet_id              = coalesce(var.subnet_id, aws_subnet.public.id)
   vpc_security_group_ids = [aws_security_group.dynamic_sg.id]
 
   tags = {
-    Name = "splat-${count.index + 1}"
+    Name        = "splat-${count.index + 1}"
+    Environment = var.environment
   }
 }
 
