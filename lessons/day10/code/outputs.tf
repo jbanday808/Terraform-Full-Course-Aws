@@ -1,44 +1,41 @@
-# ==============================================================================
-# EXAMPLE 1 OUTPUT: CONDITIONAL EXPRESSION
-# ==============================================================================
-# Uncomment when testing Example 1
+############################################
+# Example 1 – Conditional Expression Outputs
+############################################
 
 output "conditional_instance_type" {
-  description = "Instance type selected based on environment (prod=t3.large, dev=t2.micro)"
+  description = "EC2 instance type selected based on environment (prod=t3.large, dev=t2.micro)."
   value       = aws_instance.conditional_example.instance_type
 }
 
 output "conditional_instance_id" {
-  description = "Instance ID of the conditional example"
+  description = "EC2 instance ID created by the conditional example."
   value       = aws_instance.conditional_example.id
 }
 
-# ==============================================================================
-# EXAMPLE 2 OUTPUT: DYNAMIC BLOCK
-# ==============================================================================
-# Uncomment when testing Example 2
+############################################
+# Example 2 – Dynamic Block Outputs
+############################################
 
-# output "dynamic_sg_id" {
-#   description = "Security group ID with dynamic rules"
-#   value       = aws_security_group.dynamic_sg.id
-# }
+output "dynamic_security_group_id" {
+  description = "Security group ID created with dynamic ingress rules."
+  value       = aws_security_group.dynamic_sg.id
+}
 
-# output "security_group_rules_count" {
-#   description = "Number of ingress rules created dynamically"
-#   value       = length(var.ingress_rules)
-# }
+output "dynamic_security_group_rules_count" {
+  description = "Number of ingress rules generated from ingress_rules."
+  value       = length(var.ingress_rules)
+}
 
-# ==============================================================================
-# EXAMPLE 3 OUTPUTS: SPLAT EXPRESSION
-# ==============================================================================
-# Uncomment when testing Example 3
+############################################
+# Example 3 – Splat Expression Outputs
+############################################
 
-# output "all_instance_ids" {
-#   description = "All instance IDs using splat expression [*]"
-#   value       = aws_instance.splat_example[*].id
-# }
+output "splat_instance_ids" {
+  description = "All EC2 instance IDs from splat_example using splat expressions."
+  value       = local.all_instance_ids
+}
 
-# output "all_private_ips" {
-#   description = "All private IPs using splat expression [*]"
-#   value       = aws_instance.splat_example[*].private_ip
-# }
+output "splat_private_ips" {
+  description = "All private IPs from splat_example using splat expressions."
+  value       = local.all_private_ips
+}
