@@ -99,6 +99,7 @@ terraform init
    ```bash
    terraform plan
    ```
+   Expected: sees 2 ingress rules
 
 4. **Apply**:
    ```bash
@@ -110,7 +111,7 @@ terraform init
    terraform output
    ```
 
-6. **Add a new rule** in `terraform.tfvars`:
+6. **Add a new ingress rule** in `terraform.tfvars`:
    ```hcl
    ingress_rules = [
      # ... existing rules ...
@@ -128,6 +129,7 @@ terraform init
    ```bash
    terraform apply -auto-approve
    ```
+   Note: Terraform dynamically adds the new rule
 
 8. **Cleanup**:
    ```bash
@@ -154,6 +156,7 @@ terraform init
    all_instance_ids = aws_instance.splat_example[*].id
    all_private_ips = aws_instance.splat_example[*].private_ip
    ```
+   Explain: [*] extracts all values in one line
 
 2. **Explain**: Instead of a loop, `[*]` extracts all values at once
 
@@ -166,6 +169,7 @@ terraform init
    ```bash
    terraform plan
    ```
+   Expected: 3 EC2 instances
 
 5. **Apply**:
    ```bash
@@ -177,7 +181,7 @@ terraform init
    terraform output all_instance_ids
    terraform output all_private_ips
    ```
-   Shows: Arrays of all IDs and IPs
+   Output: arrays of IDs and IPs
 
 7. **Test in console** (interactive):
    ```bash
@@ -201,19 +205,19 @@ terraform init
 
 ### To Switch Examples:
 
-**Activate Example 1 Only:**
+**To activate Example 1 only:**
 ```
 main.tf: ✅ Example 1 uncommented, ❌ Example 2 & 3 commented
 outputs.tf: ✅ Example 1 outputs uncommented, ❌ Example 2 & 3 commented
 ```
 
-**Activate Example 2 Only:**
+**To activate Example 2 only:**
 ```
 main.tf: ❌ Example 1 commented, ✅ Example 2 uncommented, ❌ Example 3 commented
 outputs.tf: ❌ Example 1 commented, ✅ Example 2 outputs uncommented, ❌ Example 3 commented
 ```
 
-**Activate Example 3 Only:**
+**To activate Example 3 only:**
 ```
 main.tf: ❌ Example 1 & 2 commented, ✅ Example 3 uncommented
 outputs.tf: ❌ Example 1 & 2 commented, ✅ Example 3 outputs uncommented
@@ -223,21 +227,21 @@ outputs.tf: ❌ Example 1 & 2 commented, ✅ Example 3 outputs uncommented
 
 ## Tips for Smooth Demo
 
-1. **Use separate terminal windows** for editing and running commands
-2. **Show outputs** after each apply to demonstrate the concept
-3. **Use terraform console** for interactive exploration (especially for splat)
-4. **Explain before applying** what will happen
-5. **Always cleanup** before switching examples
+1.Use **two terminals** → one for editing, one for commands
+2. Explain **what Terraform will** do before running apply
+3. Run **terraform output** after each apply
+4. Use **terraform console** to explore splat results
+5. Always **destroy before switching demos**
 
 ---
 
 ## Troubleshooting
 
 **Error: Reference to undeclared resource**
-- Make sure you uncommented both the resource AND its outputs
+- Make sure both the resource AND the output are uncommented
 
 **Error: Output refers to sensitive values**
-- This is normal for some AWS attributes, just note it
+- Normal for certain AWS attributes (IP addresses, IDs)
 
 **Want to run all demos together?**
 - Uncomment all examples and outputs, then: **terraform apply**
