@@ -26,9 +26,7 @@ resource "aws_instance" "conditional_example" {
   instance_type = var.environment == "prod" ? "t3.large" : "t2.micro"
 
   tags = {
-    Name        = "conditional-${var.environment}"
-    Environment = var.environment
-    Project     = "Day10-Terraform-Expressions-Demo"
+    Name = "conditional-${var.environment}"
   }
 }
 
@@ -61,9 +59,7 @@ resource "aws_security_group" "dynamic_sg" {
   }
 
   tags = {
-    Name        = "dynamic-sg-${var.environment}"
-    Environment = var.environment
-    Project     = "Day10-Terraform-Expressions-Demo"
+    Name = "dynamic-sg-${var.environment}"
   }
 }
 
@@ -79,9 +75,7 @@ resource "aws_instance" "splat_example" {
   vpc_security_group_ids = [aws_security_group.dynamic_sg.id]
 
   tags = {
-    Name        = "splat-${count.index + 1}"
-    Environment = var.environment
-    Project     = "Day10-Terraform-Expressions-Demo"
+    Name = "splat-${count.index + 1}"
   }
 }
 
@@ -92,38 +86,4 @@ resource "aws_instance" "splat_example" {
 locals {
   all_instance_ids = aws_instance.splat_example[*].id
   all_private_ips  = aws_instance.splat_example[*].private_ip
-}
-
-############################################
-# Outputs
-############################################
-
-output "conditional_instance_type" {
-  description = "Instance type selected using conditional expression."
-  value       = aws_instance.conditional_example.instance_type
-}
-
-output "conditional_instance_id" {
-  description = "EC2 instance ID created by the conditional example."
-  value       = aws_instance.conditional_example.id
-}
-
-output "dynamic_security_group_id" {
-  description = "Security group ID created with dynamic ingress rules."
-  value       = aws_security_group.dynamic_sg.id
-}
-
-output "dynamic_security_group_rules_count" {
-  description = "Total number of dynamic ingress rules."
-  value       = length(var.ingress_rules)
-}
-
-output "splat_instance_ids" {
-  description = "All EC2 instance IDs using splat expression."
-  value       = local.all_instance_ids
-}
-
-output "splat_private_ips" {
-  description = "All private IPs using splat expression."
-  value       = local.all_private_ips
 }
