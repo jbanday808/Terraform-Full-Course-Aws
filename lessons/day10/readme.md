@@ -135,7 +135,31 @@ coalesce(value1, value2, value3)
 - ✅ Using defaults when none are provided
 - ✅ Cleaner configs with automatic fallbacks
 - ✅ Making modules easier to reuse
-  
+
+**Benefits:**
+- ✅ Cleaner configurations — removes long if statements
+- ✅ Automatic fallback when primary values aren’t set
+- ✅ Avoids deployment errors caused by missing variables
+- ✅ Perfect for optional inputs in modules
+- ✅ Makes configurations more reusable across environments
+- ✅ Makes defaults explicit and easy to understand
+- ✅ Reduces duplication by using one line instead of many checks
+
+**When to Use:**
+- ✅ When a value may or may not be provided
+- ✅ When you want a default backup value
+- ✅ When building reusable modules with optional parameters
+- ✅ When switching between user-supplied IDs and auto-created resources
+- ✅ When you want to prioritize certain values but still allow overrides
+- ✅ When working with multi-environment (dev, test, prod) setups
+
+**When NOT to use:**
+- ❌ When you need advanced conditional logic (use local or full conditionals instead)
+- ❌ When you want all values, not just the first available
+- ❌ When every value must be provided (use validation instead)
+- ❌ When the “fallback value” might cause confusion or unexpected behavior
+- ❌ When avoiding ambiguity is more important than flexibility
+
 ---
 
 ### 3. Splat Expressions
