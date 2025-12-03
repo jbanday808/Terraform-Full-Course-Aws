@@ -117,6 +117,8 @@ dynamic "block_name" {
 3. Document the expected data structure
 4. Validate input variables
 5. Avoid nesting dynamic blocks too deeply
+
+---
    
 ### Coalesce Function
 
