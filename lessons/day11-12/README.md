@@ -80,35 +80,43 @@ terraform destroy -auto-approve
 
 ### String Functions
 Used to clean names and normalize text
-`lower()`, `upper()`, `replace()`, `substr()`, `trim()`, `split()`, `join()`, `chomp()`
+
+**Functions:**`lower()`, `upper()`, `replace()`, `substr()`, `trim()`, `split()`, `join()`, `chomp()`
 
 ### Numeric Functions
 Used for limits, cost logic, and comparisons
-`abs()`, `max()`, `min()`, `ceil()`, `floor()`, `sum()`
+
+**Functions:**`abs()`, `max()`, `min()`, `ceil()`, `floor()`, `sum()`
  
 ### Collection Functions
 Used to combine or filter lists and maps
-`length()`, `concat()`, `merge()`, `reverse()`, `toset()`, `tolist()`
+
+**Functions:**`length()`, `concat()`, `merge()`, `reverse()`, `toset()`, `tolist()`
 
 ### Type Conversion
 Used when Terraform expects a different type
-`tonumber()`, `tostring()`, `tobool()`, `toset()`, `tolist()`
+
+**Functions:**`tonumber()`, `tostring()`, `tobool()`, `toset()`, `tolist()`
 
 ### File Functions
 Used to read files or check if they exist
-`file()`, `fileexists()`, `dirname()`, `basename()`
+
+**Functions:**`file()`, `fileexists()`, `dirname()`, `basename()`
 
 ### Date/Time Functions
 Used to generate clean, predictable timestamps
-`timestamp()`, `formatdate()`, `timeadd()`art
+
+**Functions:**`timestamp()`, `formatdate()`, `timeadd()`art
 
 ### Validation Functions
 Used to enforce naming rules or check patterns
-`can()`, `regex()`, `contains()`, `startswith()`, `endswith()`
+
+**Functions:**`can()`, `regex()`, `contains()`, `startswith()`, `endswith()`
 
 ### Lookup Functions
 Used to safely pull values from lists and maps
-`lookup()`, `element()`, `index()`
+
+**Functions:**`lookup()`, `element()`, `index()`
 
 ---
 
