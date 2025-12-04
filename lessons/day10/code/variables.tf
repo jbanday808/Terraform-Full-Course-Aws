@@ -1,35 +1,66 @@
+############################################
+# REGION & ENVIRONMENT SETTINGS
+############################################
+
 variable "aws_region" {
-  description = "AWS region (default: us-east-1)."
+  description = "AWS region where all resources will be deployed."
   type        = string
   default     = "us-east-1"
+
+  validation {
+    condition     = contains(["us-east-1", "us-west-2", "eu-west-1"], var.aws_region)
+    error_message = "aws_region must be one of: us-east-1, us-west-2, eu-west-1."
+  }
 }
 
 variable "environment" {
-  description = "Environment name: dev or prod."
+  description = "Deployment environment name (dev or prod)."
   type        = string
   default     = "dev"
+
+  validation {
+    condition     = contains(["dev", "prod"], var.environment)
+    error_message = "environment must be either dev or prod."
+  }
 }
+
+############################################
+# RESOURCE SETTINGS
+############################################
 
 variable "instance_count" {
-  description = "Number of EC2 instances to create for the splat example."
+  description = "Number of EC2 instances to create for the splat expression demo."
   type        = number
   default     = 2
+
+  validation {
+    condition     = var.instance_count >= 1 && var.instance_count <= 10
+    error_message = "instance_count must be between 1 and 10."
+  }
 }
 
+############################################
+# NETWORK SETTINGS (OPTIONAL OVERRIDES)
+############################################
+
 variable "vpc_id" {
-  description = "Optional existing VPC ID. Leave null to use demo-created VPC."
+  description = "Existing VPC ID to use. Leave null to use the Day 10 demo VPC created in vpc.tf."
   type        = string
   default     = null
 }
 
 variable "subnet_id" {
-  description = "Optional existing subnet ID. Leave null to use demo-created subnet."
+  description = "Existing subnet ID to use. Leave null to use the demo public subnet created in vpc.tf."
   type        = string
   default     = null
 }
 
+############################################
+# SECURITY GROUP RULES (DYNAMIC BLOCK INPUT)
+############################################
+
 variable "ingress_rules" {
-  description = "List of ingress rules for dynamic security group."
+  description = "Ingress rules used to dynamically build security group entries."
   type = list(object({
     from_port   = number
     to_port     = number
