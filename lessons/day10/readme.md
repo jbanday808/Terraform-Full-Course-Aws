@@ -191,7 +191,7 @@ resource_list[*].attribute_name
 
 ## 🚀 Next Steps
 
-Proceed to **Day 11** to learn about Terraform's built-in functions and how to use them effectively in your configurations.
+Continue to **Day 11** to learn about Terraform's built-in functions and how to use them effectively in your configurations.
 
 ---
 
