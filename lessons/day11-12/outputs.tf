@@ -1,259 +1,216 @@
 # ==============================================================================
-# ASSIGNMENT 1 OUTPUTS: Project Naming
+# GLOBAL OUTPUTS
+# LABEL: Global & Data Sources
 # ==============================================================================
-
-# output "formatted_project_name" {
-#   description = "Formatted project name (lowercase with hyphens)"
-#   value       = local.formatted_project_name
-# }
-
-# output "resource_group_name" {
-#   description = "Created resource group name"
-#   value       = aws_resourcegroups_group.project.name
-# }
-
-# ==============================================================================
-# ASSIGNMENT 2 OUTPUTS: Resource Tagging
-# ==============================================================================
-# Uncomment when testing Assignment 2
-
-# output "merged_tags" {
-#   description = "Combined default and environment tags"
-#   value       = local.merged_tags
-# }
-
-# output "vpc_tags" {
-#   description = "Tags applied to VPC"
-#   value       = aws_vpc.tagged_vpc.tags
-# }
-
-# ==============================================================================
-# ASSIGNMENT 3 OUTPUTS: S3 Bucket Naming
-# ==============================================================================
-# Uncomment when testing Assignment 3
-
-# output "original_bucket_name" {
-#   description = "Original bucket name input"
-#   value       = var.bucket_name
-# }
-
-# output "formatted_bucket_name" {
-#   description = "Formatted S3-compliant bucket name"
-#   value       = local.formatted_bucket_name
-# }
-
-# output "bucket_arn" {
-#   description = "ARN of created S3 bucket"
-#   value       = aws_s3_bucket.storage.arn
-# }
-
-# ==============================================================================
-# ASSIGNMENT 4 OUTPUTS: Security Group Ports
-# ==============================================================================
-# Uncomment when testing Assignment 4
-
-# output "port_list" {
-#   description = "List of ports from comma-separated string"
-#   value       = local.port_list
-# }
-
-# output "security_group_rules" {
-#   description = "Generated security group rules"
-#   value       = local.sg_rules
-# }
-
-# output "formatted_ports" {
-#   description = "Formatted port string for documentation"
-#   value       = local.formatted_ports
-# }
-
-# output "security_group_id" {
-#   description = "ID of created security group"
-#   value       = aws_security_group.app_sg.id
-# }
-
-# ==============================================================================
-# ASSIGNMENT 5 OUTPUTS: Environment Configuration
-# ==============================================================================
-# Uncomment when testing Assignment 5
-
-# output "environment" {
-#   description = "Current environment"
-#   value       = var.environment
-# }
-
-# output "instance_size" {
-#   description = "Instance size selected via lookup"
-#   value       = local.instance_size
-# }
-
-# output "instance_id" {
-#   description = "ID of created EC2 instance"
-#   value       = aws_instance.app_server.id
-# }
-
-# ==============================================================================
-# ASSIGNMENT 6 OUTPUTS: Instance Type Validation
-# ==============================================================================
-# Uncomment when testing Assignment 6
-
-# output "validated_instance_type" {
-#   description = "Validated instance type"
-#   value       = var.instance_type
-# }
-
-# output "validated_instance_id" {
-#   description = "ID of validated instance"
-#   value       = aws_instance.validated_instance.id
-# }
-
-# ==============================================================================
-# ASSIGNMENT 7 OUTPUTS: Backup Configuration
-# ==============================================================================
-# Uncomment when testing Assignment 7
-
-# output "backup_name" {
-#   description = "Backup configuration name (validated)"
-#   value       = var.backup_name
-# }
-
-# output "backup_credential" {
-#   description = "Backup credential (sensitive)"
-#   value       = var.credential
-#   sensitive   = true
-# }
-
-# output "backup_config" {
-#   description = "Complete backup configuration"
-#   value       = local.backup_config
-#   sensitive   = true
-# }
-
-# ==============================================================================
-# ASSIGNMENT 8 OUTPUTS: File Path Processing
-# ==============================================================================
-# Uncomment when testing Assignment 8
-
-# output "file_existence_status" {
-#   description = "Status of each configuration file"
-#   value       = local.file_status
-# }
-
-# output "config_directories" {
-#   description = "Directory paths extracted from file paths"
-#   value       = local.config_dirs
-# }
-
-# ==============================================================================
-# ASSIGNMENT 9 OUTPUTS: Location Management
-# ==============================================================================
-# Uncomment when testing Assignment 9
-
-  # output "all_locations" {
-  #   description = "Combined list of all locations (with duplicates)"
-  #   value       = local.all_locations
-  # }
-
-  # output "unique_locations" {
-  #   description = "Unique set of locations (duplicates removed)"
-  #   value       = local.unique_locations
-  # }
-
-  # output "location_count" {
-  #   description = "Number of unique locations"
-  #   value       = length(local.unique_locations)
-  # }
-
-# ==============================================================================
-# ASSIGNMENT 10 OUTPUTS: Cost Calculation
-# ==============================================================================
-# Uncomment when testing Assignment 10
-
-# output "original_costs" {
-#   description = "Original monthly costs (with negatives)"
-#   value       = var.monthly_costs
-# }
-
-# output "positive_costs" {
-#   description = "All costs as positive values"
-#   value       = local.positive_costs
-# }
-
-# output "max_cost" {
-#   description = "Maximum monthly cost"
-#   value       = local.max_cost
-# }
-
-# output "total_cost" {
-#   description = "Total monthly cost"
-#   value       = local.total_cost
-# }
-
-# output "average_cost" {
-#   description = "Average monthly cost"
-#   value       = local.avg_cost
-# }
-
-# ==============================================================================
-# ASSIGNMENT 11 OUTPUTS: Timestamp Management
-# ==============================================================================
-# Uncomment when testing Assignment 11
-
-# output "current_timestamp" {
-#   description = "Current timestamp"
-#   value       = local.current_timestamp
-# }
-
-# output "resource_date_suffix" {
-#   description = "Date formatted for resource names (YYYYMMDD)"
-#   value       = local.resource_date_suffix
-# }
-
-# output "tag_date_format" {
-#   description = "Date formatted for tags (DD-MM-YYYY)"
-#   value       = local.tag_date_format
-# }
-
-# output "timestamped_bucket_name" {
-#   description = "Timestamped S3 bucket name"
-#   value       = aws_s3_bucket.timestamped_bucket.id
-# }
-
-# ==============================================================================
-# ASSIGNMENT 12 OUTPUTS: File Content Handling
-# ==============================================================================
-# Uncomment when testing Assignment 12
-
-# output "config_file_exists" {
-#   description = "Whether config.json file exists"
-#   value       = local.config_file_exists
-# }
-
-# output "config_data" {
-#   description = "Configuration data from file (non-sensitive parts only)"
-#   value       = { for k, v in local.config_data : k => v if k != "password" }
-# }
-
-# output "secret_arn" {
-#   description = "ARN of AWS Secrets Manager secret"
-#   value       = aws_secretsmanager_secret.app_config.arn
-# }
-
-# ==============================================================================
-# GENERAL OUTPUTS (Always Available)
-# ==============================================================================
-
 output "current_region" {
-  description = "Current AWS region"
+  description = "AWS region Terraform is using"
   value       = data.aws_region.current.name
 }
 
-output "account_id" {
-  description = "Current AWS account ID"
+output "current_account_id" {
+  description = "AWS account ID of the caller"
   value       = data.aws_caller_identity.current.account_id
 }
 
-output "available_azs" {
-  description = "Available availability zones"
+output "available_az_names" {
+  description = "List of available AZ names in the current region"
   value       = data.aws_availability_zones.available.names
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 1
+# LABEL: Project Naming Convention
+# ==============================================================================
+output "formatted_project_name" {
+  description = "Project name converted to lowercase and hyphenated"
+  value       = local.formatted_project_name
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 2
+# LABEL: Resource Tagging
+# ==============================================================================
+output "tagged_vpc_id" {
+  description = "ID of the VPC created with merged tags"
+  value       = aws_vpc.tagged_vpc.id
+}
+
+output "tagged_vpc_tags" {
+  description = "All tags applied to the tagged VPC"
+  value       = aws_vpc.tagged_vpc.tags
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 3
+# LABEL: S3 Bucket Naming
+# ==============================================================================
+output "storage_bucket_name" {
+  description = "Final formatted S3 bucket name"
+  value       = aws_s3_bucket.storage.bucket
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 4
+# LABEL: Security Group Port Configuration
+# ==============================================================================
+output "security_group_id" {
+  description = "ID of the dynamic security group"
+  value       = aws_security_group.app_sg.id
+}
+
+output "security_group_vpc_id" {
+  description = "VPC ID where the security group is created"
+  value       = aws_security_group.app_sg.vpc_id
+}
+
+output "formatted_ports_documentation" {
+  description = "Ports formatted as a single documentation string"
+  value       = local.formatted_ports
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 5
+# LABEL: Environment Configuration Lookup
+# ==============================================================================
+output "app_server_id" {
+  description = "EC2 instance ID for the environment-based app server"
+  value       = aws_instance.app_server.id
+}
+
+output "app_server_instance_type" {
+  description = "Instance type selected via lookup for the app server"
+  value       = aws_instance.app_server.instance_type
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 6
+# LABEL: Instance Type Validation
+# ==============================================================================
+output "validated_instance_id" {
+  description = "EC2 instance ID created using the validated instance type"
+  value       = aws_instance.validated_instance.id
+}
+
+output "validated_instance_type" {
+  description = "The instance type that passed validation"
+  value       = aws_instance.validated_instance.instance_type
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 7
+# LABEL: Backup Configuration
+# ==============================================================================
+output "backup_configuration" {
+  description = "Backup configuration summary (without credential)"
+  value = {
+    name    = local.backup_config.name
+    enabled = local.backup_config.enabled
+  }
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 8
+# LABEL: File Path Processing
+# ==============================================================================
+output "config_file_status" {
+  description = "Map of config file paths to their existence (true/false)"
+  value       = local.file_status
+}
+
+output "config_directories" {
+  description = "Map of config file paths to their parent directories"
+  value       = local.config_dirs
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 9
+# LABEL: Resource Location Management
+# ==============================================================================
+output "all_locations" {
+  description = "Combined list of user and default locations (with duplicates)"
+  value       = local.all_locations
+}
+
+output "unique_locations" {
+  description = "Set of unique AWS locations after merging"
+  value       = local.unique_locations
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 10
+# LABEL: Cost Calculation
+# ==============================================================================
+output "positive_costs" {
+  description = "Monthly costs converted to positive values"
+  value       = local.positive_costs
+}
+
+output "maximum_monthly_cost" {
+  description = "Highest monthly cost after conversion"
+  value       = local.max_cost
+}
+
+output "total_monthly_cost" {
+  description = "Sum of all monthly costs (absolute values)"
+  value       = local.total_cost
+}
+
+output "average_monthly_cost" {
+  description = "Average monthly cost across all entries"
+  value       = local.avg_cost
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 11
+# LABEL: Timestamp Management
+# ==============================================================================
+output "timestamped_bucket_name" {
+  description = "Name of the timestamped backup bucket"
+  value       = aws_s3_bucket.timestamped_bucket.bucket
+}
+
+output "timestamped_backup_name" {
+  description = "Generated backup name including date suffix"
+  value       = local.timestamped_name
+}
+
+output "resource_date_suffix" {
+  description = "YYYYMMDD date suffix used in resource naming"
+  value       = local.resource_date_suffix
+}
+
+output "tag_date_format" {
+  description = "DD-MM-YYYY formatted date used in tags"
+  value       = local.tag_date_format
+}
+
+
+# ==============================================================================
+# ASSIGNMENT 12
+# LABEL: File Content Handling
+# ==============================================================================
+output "config_file_exists" {
+  description = "Indicates whether config.json was found"
+  value       = local.config_file_exists
+}
+
+output "config_database_settings" {
+  description = "Database configuration loaded from config.json or default"
+  value       = local.config_data.database
+}
+
+output "app_config_secret_arn" {
+  description = "ARN of the AWS Secrets Manager secret that stores app config"
+  value       = aws_secretsmanager_secret.app_config.arn
 }
