@@ -82,4 +82,4 @@ xcode-select --install
 ```
 
 ## Next Steps
-Move to Day 2 to explore Terraform Providers and how they connect Terraform to AWS.
+Continue to Day 2 to see how Terraform Providers link your setup directly to AWS.
