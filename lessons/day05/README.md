@@ -1,11 +1,11 @@
 # Day 5/28 - Terraform Variables Demo
 
-A simple demo showing the three types of Terraform variables using a basic S3 bucket.
+A simple demo using an S3 bucket to explain the three types of Terraform variables.
 
 ## 🎯 Three Types of Variables
 
 ### 1. **Input Variables** (`variables.tf`)
-Values you provide to Terraform - like function parameters
+Values you pass into Terraform so your configuration stays flexible
 ```hcl
 variable "environment" {
   description = "Environment name"
@@ -15,7 +15,7 @@ variable "environment" {
 ```
 
 ### 2. **Local Variables** (`locals.tf`)
-Internal computed values - like local variables in programming
+Values Terraform computes internally to keep code clean and reusable
 ```hcl
 locals {
   common_tags = {
@@ -28,7 +28,7 @@ locals {
 ```
 
 ### 3. **Output Variables** (`output.tf`)
-Values returned after deployment - like function return values
+Values Terraform prints after deployment to show what was created
 ```hcl
 output "bucket_name" {
   description = "Name of the S3 bucket"
@@ -36,17 +36,17 @@ output "bucket_name" {
 }
 ```
 
-## 📥 Understanding Input Variables in Detail
+## 📥 Input Variables in Detail
 
 ### What are Input Variables?
-Input variables are like **function parameters** - they allow you to customize your Terraform configuration without hardcoding values.
+They act like simple parameters — you decide the values, Terraform uses them during deployment.
 
 ### Basic Input Variable Structure
 ```hcl
-variable "variable_name" {
-  description = "What this variable is for"
+variable "name" {
+  description = "Purpose"
   type        = string
-  default     = "default_value"  # Optional
+  default     = "value"
 }
 ```
 
@@ -75,13 +75,11 @@ resource "aws_s3_bucket" "demo" {
 }
 ```
 
-### Providing Values to Input Variables
+### Ways to Provide Values
 
 **1. Default values** (in variables.tf)
 ```hcl
-variable "environment" {
-  default = "staging"
-}
+default = "staging"
 ```
 
 **2. terraform.tfvars file** (auto-loaded)
@@ -101,10 +99,10 @@ export TF_VAR_environment="development"
 terraform plan
 ```
 
-## 📤 Understanding Output Variables in Detail
+## 📤 Output Variables in Detail
 
 ### What are Output Variables?
-Output variables are like **function return values** - they display important information after Terraform creates your infrastructure.
+They help you quickly see important information after Terraform finishes a deployment.
 
 ### Basic Output Variable Structure
 ```hcl
@@ -114,7 +112,7 @@ output "output_name" {
 }
 ```
 
-### How to Use Output Variables
+### Output Variables
 
 **Define in output.tf**
 ```hcl
@@ -142,7 +140,7 @@ output "tags" {
 }
 ```
 
-### Viewing Outputs
+### View Outputs
 
 After running `terraform apply`, you can view outputs:
 
@@ -164,12 +162,12 @@ tags = {
 }
 ```
 
-## 🏗️ What This Creates
+## 🏗️ What This Demo Builds
 
-Just one simple S3 bucket that demonstrates all three variable types:
-- Uses **input variables** for environment and bucket name
-- Uses **local variables** for computed bucket name and tags
-- Uses **output variables** to show the created bucket details
+One S3 bucket that clearly shows:
+- Uses **input variables** for user-provided values
+- Uses **local variables** for computed name and tags
+- Uses **output variables** to show the final details
 
 ## 🚀 Variable Precedence Testing
 
@@ -207,7 +205,7 @@ terraform plan -var-file="production.tfvars"  # environment = "production"
 ```
 ```
 
-## 📁 Simple File Structure
+## 📁 Project Structure
 
 ```
 ├── main.tf           # S3 bucket resource
@@ -239,7 +237,7 @@ terraform plan -var="environment=test" -var="bucket_name=my-test-bucket"
 # Shows: Environment = "test", bucket will be "test-my-test-bucket-xxxxx"
 ```
 
-### Example 2: Viewing All Variable Types in Action
+### Example 2: Seeing All Variables in Action
 
 ```bash
 # Apply the configuration
@@ -308,9 +306,8 @@ terraform destroy
 
 ## 💡 Key Takeaways
 
-- **Input variables**: Parameterize your configuration
-- **Local variables**: Compute and reuse values
-- **Output variables**: Share results after deployment
+- **Input variables**: user-defined settings
+- **Local variables**: computed helper values
+- **Output variables**: final results
 - **Precedence**: Command line > tfvars > environment vars > defaults
 
-This simple example shows exactly how the video explains variables - clear, focused, and easy to understand!
