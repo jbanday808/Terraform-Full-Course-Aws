@@ -1,19 +1,18 @@
 # Terraform Functions Demo Guide - Day 11-12
 
 ## Overview
-This guide provides step-by-step instructions for demonstrating Terraform built-in functions through 12 hands-on assignments. Each assignment focuses on specific functions and can be tested independently by commenting/uncommenting code blocks.
+This guide walks you through short, focused demos that show how Terraform built-in functions behave in real scenarios. Each assignment teaches one concept at a time, shows the input, shows how Terraform transforms it, and gives you a simple sequence of commands to run. You enable each assignment by commenting/uncommenting specific code blocks in `main.tf` and `outputs.tf`.
 
 ---
 
 ## Initial Setup
 
 ```bash
-cd /home/baivab/repos/Terraform-Full-Course-Aws/lessons/day11-12
 
-# Initialize Terraform (comment out backend in backend.tf for local testing)
+# Initialize Terraform (disable backend in backend.tf for local runs)
 terraform init
 
-# Test basic functions in console
+# Open the console for quick testing
 terraform console
 ```
 
@@ -21,7 +20,7 @@ terraform console
 
 ## Console Practice
 
-Before starting assignments, practice these basic functions in `terraform console`:
+Use the console to quickly see how each function behaves before running the full assignments. This helps you build intuition without creating any resources:
 
 ```hcl
 # String functions
@@ -63,7 +62,7 @@ exit
 ✅ **Active by default** (uncommented in main.tf)
 
 ### What It Does
-Transforms "Project ALPHA Resource" → "project-alpha-resource"
+Converts the original project name into a consistent, lowercase, hyphenated, AWS-friendly format: "project-alpha-resource".
 
 ### Demo Steps
 
@@ -73,6 +72,7 @@ Transforms "Project ALPHA Resource" → "project-alpha-resource"
      default = "Project ALPHA Resource"
    }
    ```
+   Explain that this is how names often come from stakeholders or documentation
 
 2. **Show the transformation** in `main.tf`:
    ```hcl
@@ -80,12 +80,13 @@ Transforms "Project ALPHA Resource" → "project-alpha-resource"
      formatted_project_name = lower(replace(var.project_name, " ", "-"))
    }
    ```
+   Highlight that you’re standardizing the name by replacing spaces and forcing lowercase
 
 3. **Plan the deployment**:
    ```bash
    terraform plan
    ```
-   Point out the formatted name in the plan.
+   Point out where formatted_project_name appears in the plan.
 
 4. **Apply**:
    ```bash
@@ -97,6 +98,7 @@ Transforms "Project ALPHA Resource" → "project-alpha-resource"
    terraform output formatted_project_name
    terraform output resource_group_name
    ```
+   Show that the resource group (or logical grouping) uses the cleaned name
 
 6. **Test in console**:
    ```bash
@@ -107,11 +109,13 @@ Transforms "Project ALPHA Resource" → "project-alpha-resource"
    var.project_name
    exit
    ```
+   Compare the raw input (var.project_name) with the transformed value (local.formatted_project_name)
 
 7. **Cleanup**:
    ```bash
    terraform destroy -auto-approve
    ```
+   This keeps the environment clean before moving to the next assignment
 
 ---
 
@@ -125,7 +129,7 @@ Transforms "Project ALPHA Resource" → "project-alpha-resource"
 3. Uncomment Assignment 2 outputs in `outputs.tf`
 
 ### What It Does
-Combines default company tags with environment-specific tags.
+Combines default organization-wide tags with environment-specific tags into a single tag map that you can apply to any AWS resource.
 
 ### Demo Steps
 
@@ -145,6 +149,7 @@ Combines default company tags with environment-specific tags.
      }
    }
    ```
+   Explain that default_tags are reused everywhere, while environment_tags change by environment
 
 2. **Show the merge** in `main.tf`:
    ```hcl
@@ -152,6 +157,7 @@ Combines default company tags with environment-specific tags.
      merged_tags = merge(var.default_tags, var.environment_tags)
    }
    ```
+   Mention that when keys overlap, the later map (environment_tags) takes precedence
 
 3. **Plan and Apply**:
    ```bash
@@ -164,6 +170,7 @@ Combines default company tags with environment-specific tags.
    terraform output merged_tags
    terraform output vpc_tags
    ```
+   Show that vpc_tags are exactly what will be attached to the VPC
 
 5. **Test in console**:
    ```bash
@@ -174,6 +181,7 @@ Combines default company tags with environment-specific tags.
    local.merged_tags
    exit
    ```
+   Use the console to demonstrate the merge without re-running a full plan
 
 6. **Cleanup**:
    ```bash
@@ -191,9 +199,9 @@ Combines default company tags with environment-specific tags.
 2. Uncomment Assignment 3 in `main.tf` and `outputs.tf`
 
 ### What It Does
-Transforms invalid S3 name to valid format:
+Takes a messy, human-friendly bucket name and converts it into a valid S3 bucket name (max 63 characters, lowercase, no spaces or special characters):
 - Input: "ProjectAlphaStorageBucket with CAPS and spaces!!!"
-- Output: "projectalphastoragebucket" (max 63 chars, lowercase, no spaces/special chars)
+- Output: "projectalphastoragebucket"
 
 ### Demo Steps
 
@@ -203,6 +211,7 @@ Transforms invalid S3 name to valid format:
      default = "ProjectAlphaStorageBucket with CAPS and spaces!!!"
    }
    ```
+   Explain why this string would fail S3 naming rules
 
 2. **Show the transformation** in `main.tf`:
    ```hcl
@@ -216,6 +225,7 @@ Transforms invalid S3 name to valid format:
      )
    }
    ```
+   Walk through each step: trim to 63 chars, lower, remove spaces, remove exclamation marks
 
 3. **Apply**:
    ```bash
@@ -232,6 +242,7 @@ Transforms invalid S3 name to valid format:
    ```bash
    aws s3 ls | grep project
    ```
+   Confirm that the bucket exists with the cleaned name
 
 6. **Cleanup**:
    ```bash
@@ -250,9 +261,9 @@ Transforms invalid S3 name to valid format:
 3. Uncomment Assignment 4 in `main.tf` and `outputs.tf`
 
 ### What It Does
+Reads a comma-separated list of ports and automatically builds structured security group rules and a readable string summary:
 - Input: "80,443,8080,3306"
-- Creates security group rules for each port
-- Output format: "port-80-port-443-port-8080-port-3306"
+- Example summary output: "port-80-port-443-port-8080-port-3306"
 
 ### Demo Steps
 
@@ -277,6 +288,7 @@ Transforms invalid S3 name to valid format:
      formatted_ports = join("-", [for port in local.port_list : "port-${port}"])
    }
    ```
+   Explain that port_list is a list of strings and sg_rules is a list of objects used to create security group rules
 
 3. **Test in console first**:
    ```bash
@@ -302,6 +314,7 @@ Transforms invalid S3 name to valid format:
    terraform output formatted_ports
    terraform output security_group_id
    ```
+   Show how security_group_rules maps directly to the created rules
 
 6. **Cleanup**:
    ```bash
@@ -319,7 +332,7 @@ Transforms invalid S3 name to valid format:
 2. Uncomment Assignment 5 in `main.tf` and `outputs.tf`
 
 ### What It Does
-Selects instance size based on environment using lookup with fallback.
+Selects the correct instance size based on the environment (dev, staging, prod) and falls back to a safe default if the key is missing.
 
 ### Demo Steps
 
@@ -340,6 +353,7 @@ Selects instance size based on environment using lookup with fallback.
      instance_size = lookup(var.instance_sizes, var.environment, "t2.micro")
    }
    ```
+   Explain that var.environment controls which size is picked
 
 3. **Test different environments**:
    ```bash
@@ -392,9 +406,9 @@ Selects instance size based on environment using lookup with fallback.
 3. Uncomment Assignment 6 in `main.tf` and `outputs.tf`
 
 ### What It Does
-Validates instance type using multiple rules:
-- Length between 2 and 20 characters
-- Must start with "t2" or "t3"
+Validates the instance_type input using multiple rules before any resources are created:
+- Length must be between 2 and 20 characters
+- Pattern must start with t2. or t3. (e.g., t2.micro, t3.small)
 
 ### Demo Steps
 
@@ -458,8 +472,7 @@ Validates instance type using multiple rules:
 2. Uncomment Assignment 7 in `main.tf` and `outputs.tf`
 
 ### What It Does
-- Validates backup name ends with "_backup"
-- Handles sensitive credentials properly
+Enforces a simple naming rule for backups and marks credentials as sensitive so they are never printed in plain text.
 
 ### Demo Steps
 
@@ -528,7 +541,7 @@ Validates instance type using multiple rules:
 2. Uncomment Assignment 9 in `main.tf` and `outputs.tf`
 
 ### What It Does
-Combines location lists and removes duplicates.
+Merges two lists of regions (user-provided and default) and removes duplicates, giving you a clean list of unique locations..
 
 ### Demo Steps
 
@@ -586,10 +599,7 @@ Combines location lists and removes duplicates.
 2. Uncomment Assignment 10 in `main.tf` and `outputs.tf`
 
 ### What It Does
-Processes monthly costs:
-- Converts negative values (credits) to positive
-- Finds maximum cost
-- Calculates totals and averages
+Normalizes cost data by turning credits into positive values, then calculates total, max, and average costs for reporting.
 
 ### Demo Steps
 
@@ -642,9 +652,9 @@ Processes monthly costs:
 2. Uncomment Assignment 11 in `main.tf` and `outputs.tf`
 
 ### What It Does
-Generates formatted timestamps for different purposes:
-- Resource names: YYYYMMDD
-- Tags: DD-MM-YYYY
+Generates reusable timestamps in different formats for resource names, tags, and logging:
+- Resource suffix: YYYYMMDD
+- Tag format: DD-MM-YYYY
 
 ### Demo Steps
 
@@ -702,7 +712,7 @@ Generates formatted timestamps for different purposes:
 3. Uncomment Assignment 12 in `main.tf` and `outputs.tf`
 
 ### What It Does
-Securely reads and stores JSON configuration in AWS Secrets Manager.
+Checks for a local JSON configuration file, loads it when present, decodes it into a Terraform map/object, and securely stores it in AWS Secrets Manager.
 
 ### Demo Steps
 
@@ -731,6 +741,7 @@ Securely reads and stores JSON configuration in AWS Secrets Manager.
      config_data        = local.config_file_exists ? jsondecode(file("./config.json")) : {}
    }
    ```
+   Explain that Terraform only reads and decodes the file if it exists
 
 3. **Test in console**:
    ```bash
@@ -801,13 +812,13 @@ Some assignments require others:
 
 ## 💡 Tips for Smooth Demo
 
-1. **Use terraform console** extensively to show function behavior
-2. **Show before/after** for transformations
-3. **Explain validation errors** when they occur
+1. **Use terraform console** to explain function behavior before changing real resources
+2. Always show the **before (variable input)** and **after (local/outputs)** so the transformation is clear
+3. **Treat validation errors** as teaching moments and read the error message out loud
 4. **Point out outputs** that demonstrate the functions
-5. **Keep only one assignment active** at a time for clarity
-6. **Use `-auto-approve`** for faster demos (after showing plan)
-7. **Have config.json** pre-created for Assignment 12
+5. **Keep only one assignment** active at a time to avoid noise in plans and outputs
+6. Use **-auto-approve** for faster runs once you have shown at least one **terraform plan**
+7. Pre-create config.json before Assignment 12 to avoid delays during the demo
 
 ---
 
@@ -817,23 +828,23 @@ Some assignments require others:
 **Solution:** Comment out backend block in `backend.tf` for local testing
 
 **Issue:** Resource already exists  
-**Solution:** Run `terraform destroy` before switching assignments
+**Solution:** Run `terraform destroy` before switching assignments or re-running demos
 
 **Issue:** Validation errors  
-**Solution:** These are expected! Show students the error messages
+**Solution:** This is expected; use them to explain how Terraform protects against bad input
 
 **Issue:** Timestamp changes on every run  
-**Solution:** This is expected behavior for `timestamp()` function
+**Solution:** Normal behavior for `timestamp()`; it always returns the current time
 
 ---
 
 ## 🚀 Next Steps
 
 After completing these assignments, students should:
-1. Understand when to use each function type
-2. Be comfortable reading Terraform documentation
-3. Know how to test functions in terraform console
-4. Be able to combine multiple functions
-5. Understand data validation patterns
+1. Understand when and why to use each major function type
+2. Be comfortable reading and applying Terraform documentation examples
+3. Know how to use terraform console to test expressions safely
+4. Be able to combine functions to solve real configuration problems
+5. Recognize and design common validation patterns for safer inputs
 
-Proceed to **Day 13** for more advanced Terraform concepts!
+Continue to **Day 13** for more advanced Terraform concepts!
