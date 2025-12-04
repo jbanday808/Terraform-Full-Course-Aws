@@ -26,7 +26,6 @@ variable "default_tags" {
   type        = map(string)
   description = "Default resource tags"
 
-  # LABEL: Local - fallback values
   default = {
     company    = "TechCorp"
     managed_by = "terraform"
@@ -37,7 +36,6 @@ variable "environment_tags" {
   type        = map(string)
   description = "Environment-specific resource tags"
 
-  # LABEL: Local - environment-specific values
   default = {
     environment = "production"
     cost_center = "cc-123"
@@ -51,7 +49,7 @@ variable "environment_tags" {
 variable "bucket_name" {
   type        = string
   description = "Raw input name for S3 bucket (will be cleaned and formatted)"
-  default     = "ProjectAlphaStorageBucket with CAPS and spaces!!!"
+  default     = "day11-12-terraform-functions-demo-bucket-001"
 }
 
 # ==============================================================================
@@ -73,7 +71,6 @@ variable "environment" {
   description = "Deployment environment for EC2, S3, and tagging operations"
   default     = "dev"
 
-  # LABEL: Validation - allowed environments
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
     error_message = "Environment must be one of: dev, staging, prod"
@@ -84,7 +81,6 @@ variable "instance_sizes" {
   type        = map(string)
   description = "Instance size lookup map based on environment"
 
-  # LABEL: Local - environment → instance size
   default = {
     dev     = "t2.micro"
     staging = "t3.small"
@@ -101,13 +97,11 @@ variable "instance_type" {
   description = "EC2 instance type used for validation tests"
   default     = "t2.micro"
 
-  # LABEL: Validation - length check
   validation {
     condition     = length(var.instance_type) >= 2 && length(var.instance_type) <= 20
     error_message = "Instance type must be between 2 and 20 characters"
   }
 
-  # LABEL: Validation - must start with t2 or t3
   validation {
     condition     = can(regex("^t[2-3]\\.", var.instance_type))
     error_message = "Instance type must start with t2 or t3"
@@ -123,7 +117,6 @@ variable "backup_name" {
   description = "Backup configuration name used in resource naming"
   default     = "daily_backup"
 
-  # LABEL: Validation - required suffix
   validation {
     condition     = endswith(var.backup_name, "_backup")
     error_message = "backup_name must end with '_backup'"
@@ -134,7 +127,7 @@ variable "credential" {
   type        = string
   description = "Credential for backup configuration (sensitive)"
   default     = "xyz123"
-  sensitive   = true   # LABEL: Sensitive value
+  sensitive   = true
 }
 
 # ==============================================================================
