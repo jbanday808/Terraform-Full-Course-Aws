@@ -513,4 +513,4 @@ terraform apply
 5. **Overly complex structure** - Simple is often better
 
 ## Next Steps
-Proceed to Day 7 to learn about Terraform type constraints and how to properly define and validate variable types.
+Continue to Day 7 to learn about Terraform type constraints and how to properly define and validate variable types.
