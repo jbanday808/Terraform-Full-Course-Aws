@@ -1,19 +1,32 @@
 # ==============================================================================
-# ASSIGNMENT 1: Project Naming Convention
+# GLOBAL SETTINGS
+# LABEL: AWS Region
 # ==============================================================================
+variable "aws_region" {
+  type        = string
+  description = "AWS region used for all deployments"
+  default     = "us-east-1"
+}
 
+# ==============================================================================
+# ASSIGNMENT 1
+# LABEL: Project Naming Convention
+# ==============================================================================
 variable "project_name" {
   type        = string
-  description = "Name of the project"
+  description = "Name of the project used as the base identifier"
   default     = "Project ALPHA Resource"
 }
 
 # ==============================================================================
-# ASSIGNMENT 2: Resource Tagging
+# ASSIGNMENT 2
+# LABEL: Resource Tagging
 # ==============================================================================
-
 variable "default_tags" {
-  type = map(string)
+  type        = map(string)
+  description = "Default resource tags"
+
+  # LABEL: Local - fallback values
   default = {
     company    = "TechCorp"
     managed_by = "terraform"
@@ -21,7 +34,10 @@ variable "default_tags" {
 }
 
 variable "environment_tags" {
-  type = map(string)
+  type        = map(string)
+  description = "Environment-specific resource tags"
+
+  # LABEL: Local - environment-specific values
   default = {
     environment = "production"
     cost_center = "cc-123"
@@ -29,19 +45,19 @@ variable "environment_tags" {
 }
 
 # ==============================================================================
-# ASSIGNMENT 3: S3 Bucket Naming
+# ASSIGNMENT 3
+# LABEL: S3 Bucket Naming
 # ==============================================================================
-
 variable "bucket_name" {
   type        = string
-  description = "S3 bucket name (must be globally unique)"
+  description = "Raw input name for S3 bucket (will be cleaned and formatted)"
   default     = "ProjectAlphaStorageBucket with CAPS and spaces!!!"
 }
 
 # ==============================================================================
-# ASSIGNMENT 4: Security Group Port Configuration
+# ASSIGNMENT 4
+# LABEL: Security Group Port Configuration
 # ==============================================================================
-
 variable "allowed_ports" {
   type        = string
   description = "Comma-separated list of allowed ports"
@@ -49,14 +65,15 @@ variable "allowed_ports" {
 }
 
 # ==============================================================================
-# ASSIGNMENT 5: Environment Configuration Lookup
+# ASSIGNMENT 5
+# LABEL: Environment Configuration Lookup
 # ==============================================================================
-
 variable "environment" {
   type        = string
-  description = "Environment name"
+  description = "Deployment environment for EC2, S3, and tagging operations"
   default     = "dev"
 
+  # LABEL: Validation - allowed environments
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
     error_message = "Environment must be one of: dev, staging, prod"
@@ -64,7 +81,10 @@ variable "environment" {
 }
 
 variable "instance_sizes" {
-  type = map(string)
+  type        = map(string)
+  description = "Instance size lookup map based on environment"
+
+  # LABEL: Local - environment → instance size
   default = {
     dev     = "t2.micro"
     staging = "t3.small"
@@ -73,19 +93,21 @@ variable "instance_sizes" {
 }
 
 # ==============================================================================
-# ASSIGNMENT 6: Instance Type Validation
+# ASSIGNMENT 6
+# LABEL: Instance Type Validation
 # ==============================================================================
-
 variable "instance_type" {
   type        = string
-  description = "EC2 instance type"
+  description = "EC2 instance type used for validation tests"
   default     = "t2.micro"
 
+  # LABEL: Validation - length check
   validation {
     condition     = length(var.instance_type) >= 2 && length(var.instance_type) <= 20
     error_message = "Instance type must be between 2 and 20 characters"
   }
 
+  # LABEL: Validation - must start with t2 or t3
   validation {
     condition     = can(regex("^t[2-3]\\.", var.instance_type))
     error_message = "Instance type must start with t2 or t3"
@@ -93,49 +115,50 @@ variable "instance_type" {
 }
 
 # ==============================================================================
-# ASSIGNMENT 7: Backup Configuration
+# ASSIGNMENT 7
+# LABEL: Backup Configuration
 # ==============================================================================
-
 variable "backup_name" {
   type        = string
-  description = "Backup configuration name"
+  description = "Backup configuration name used in resource naming"
   default     = "daily_backup"
 
+  # LABEL: Validation - required suffix
   validation {
     condition     = endswith(var.backup_name, "_backup")
-    error_message = "Backup name must end with '_backup'"
+    error_message = "backup_name must end with '_backup'"
   }
 }
 
 variable "credential" {
   type        = string
-  description = "Sensitive credential"
+  description = "Credential for backup configuration (sensitive)"
   default     = "xyz123"
-  sensitive   = true
+  sensitive   = true   # LABEL: Sensitive value
 }
 
 # ==============================================================================
-# ASSIGNMENT 9: Resource Location Management
+# ASSIGNMENT 9
+# LABEL: Resource Location Management
 # ==============================================================================
-
 variable "user_locations" {
   type        = list(string)
-  description = "User-specified AWS regions"
-  default     = ["us-east-1", "us-west-2", "us-east-1"] # Contains duplicate
+  description = "User-provided AWS regions (may include duplicates)"
+  default     = ["us-east-1", "us-west-2", "us-east-1"]
 }
 
 variable "default_locations" {
   type        = list(string)
-  description = "Default AWS regions"
+  description = "Default AWS regions used in location merging"
   default     = ["us-west-1"]
 }
 
 # ==============================================================================
-# ASSIGNMENT 10: Cost Calculation
+# ASSIGNMENT 10
+# LABEL: Cost Calculation
 # ==============================================================================
-
 variable "monthly_costs" {
   type        = list(number)
-  description = "Monthly infrastructure costs (can include negative values for credits)"
+  description = "List of monthly infrastructure costs; negatives represent credits"
   default     = [-50, 100, 75, 200]
 }
