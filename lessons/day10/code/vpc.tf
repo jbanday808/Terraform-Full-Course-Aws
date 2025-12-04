@@ -1,19 +1,23 @@
 ############################################
-# Simple VPC for Day 10 Demos
+# NETWORK LAYER – VPC CREATION
 ############################################
 
-# VPC
 resource "aws_vpc" "demo" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
 
   tags = {
-    Name = "day10-demo-vpc"
+    Name        = "day10-demo-vpc"
+    Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
-# Public Subnet
+############################################
+# SUBNET – PUBLIC SUBNET FOR EC2 & DEMOS
+############################################
+
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.demo.id
   cidr_block              = "10.0.1.0/24"
@@ -21,48 +25,69 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "day10-demo-subnet-public"
+    Name        = "day10-demo-subnet-public"
+    Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
-# Internet Gateway
+############################################
+# INTERNET GATEWAY – PUBLIC INTERNET ACCESS
+############################################
+
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.demo.id
 
   tags = {
-    Name = "day10-demo-igw"
+    Name        = "day10-demo-igw"
+    Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
-# Public Route Table
+############################################
+# ROUTING – PUBLIC ROUTE TABLE
+############################################
+
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.demo.id
 
   tags = {
-    Name = "day10-demo-route-table-public"
+    Name        = "day10-demo-route-table-public"
+    Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
-# Default route to the Internet
+############################################
+# ROUTE – DEFAULT INTERNET ROUTE (0.0.0.0/0)
+############################################
+
 resource "aws_route" "public_internet_access" {
   route_table_id         = aws_route_table.public_rt.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.igw.id
 }
 
-# Associate subnet with public route table
+############################################
+# ASSOCIATION – LINK SUBNET TO ROUTE TABLE
+############################################
+
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public_rt.id
 }
 
-# Helpful outputs (optional but nice for debugging)
+############################################
+# OPTIONAL OUTPUTS – HELPFUL FOR DEBUGGING
+############################################
+
 output "demo_vpc_id" {
-  description = "ID of the demo VPC."
+  description = "ID of the Day 10 demo VPC."
   value       = aws_vpc.demo.id
 }
 
 output "demo_public_subnet_id" {
-  description = "ID of the public subnet in the demo VPC."
+  description = "ID of the Day 10 public subnet."
   value       = aws_subnet.public.id
 }
