@@ -1,10 +1,15 @@
 ############################################
-# Day 10 – Terraform Expressions Demo
-# Conditional, Dynamic, and Splat Examples
+# DAY 10 – TERRAFORM EXPRESSIONS DEMO
+# Includes:
+#   • Conditional Expressions
+#   • Dynamic Blocks
+#   • Splat Expressions
 ############################################
 
+
 ############################################
-# Data Source – Latest Amazon Linux 2 AMI
+# DATA SOURCES
+# (Latest Amazon Linux 2 AMI)
 ############################################
 
 data "aws_ami" "amazon_linux" {
@@ -17,36 +22,44 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+
 ############################################
-# Example 1 – Conditional Expression
+# EXAMPLE 1 – CONDITIONAL EXPRESSION
+# Decision-making expression:
+#   If prod → t3.large
+#   Else    → t2.micro
 ############################################
 
 resource "aws_instance" "conditional_example" {
   ami           = data.aws_ami.amazon_linux.id
   instance_type = var.environment == "prod" ? "t3.large" : "t2.micro"
 
-  # Use existing subnet if provided, otherwise the demo subnet
+  # Use existing subnet if provided, otherwise use demo subnet (fallback)
   subnet_id              = coalesce(var.subnet_id, aws_subnet.public.id)
   vpc_security_group_ids = [aws_security_group.dynamic_sg.id]
 
   tags = {
     Name        = "conditional-${var.environment}"
     Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
+
 ############################################
-# Example 2 – Dynamic Security Group Rules
+# EXAMPLE 2 – DYNAMIC BLOCKS
+# Automatically builds multiple ingress rules
+# based on the ingress_rules variable list.
 ############################################
 
 resource "aws_security_group" "dynamic_sg" {
   name        = "dynamic-sg-${var.environment}"
   description = "Security group with dynamic ingress rules"
 
-  # Use existing VPC if provided, otherwise the demo VPC
+  # Use existing VPC if provided, otherwise use demo VPC
   vpc_id = coalesce(var.vpc_id, aws_vpc.demo.id)
 
-  # Dynamic ingress rules pulled from var.ingress_rules
+  # Dynamic ingress rule generator
   dynamic "ingress" {
     for_each = var.ingress_rules
     content {
@@ -58,7 +71,7 @@ resource "aws_security_group" "dynamic_sg" {
     }
   }
 
-  # Allow all outbound by default
+  # Default outbound rule
   egress {
     from_port   = 0
     to_port     = 0
@@ -69,11 +82,16 @@ resource "aws_security_group" "dynamic_sg" {
   tags = {
     Name        = "dynamic-sg-${var.environment}"
     Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
+
 ############################################
-# Example 3 – Splat Expressions
+# EXAMPLE 3 – SPLAT EXPRESSIONS
+# Creates multiple instances and extracts:
+#   • All instance IDs
+#   • All private IPs
 ############################################
 
 resource "aws_instance" "splat_example" {
@@ -82,18 +100,21 @@ resource "aws_instance" "splat_example" {
   ami           = data.aws_ami.amazon_linux.id
   instance_type = "t2.micro"
 
-  # Use existing subnet if provided, otherwise the demo subnet
+  # Use existing subnet if provided, otherwise use demo subnet
   subnet_id              = coalesce(var.subnet_id, aws_subnet.public.id)
   vpc_security_group_ids = [aws_security_group.dynamic_sg.id]
 
   tags = {
     Name        = "splat-${count.index + 1}"
     Environment = var.environment
+    Project     = "Day10-Terraform-Expressions-Demo"
   }
 }
 
+
 ############################################
-# Locals – Splat Extracted Values
+# LOCAL VALUES – EXTRACTING SPLAT RESULTS
+# Collects all instance IDs and IPs into lists.
 ############################################
 
 locals {
