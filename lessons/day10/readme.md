@@ -201,6 +201,7 @@ Proceed to **Day 11** to learn about Terraform's built-in functions and how to u
 - [Terraform Conditional Expressions](https://www.terraform.io/language/expressions/conditionals)
 - [Terraform Dynamic Blocks](https://www.terraform.io/language/expressions/dynamic-blocks)
 - [Terraform Splat Expressions](https://www.terraform.io/language/expressions/splat)
+- [Terraform coalesce Function](https://developer.hashicorp.com/terraform/language/functions/coalesce)
 - [Terraform For Expressions](https://www.terraform.io/language/expressions/for)
 
 ---
