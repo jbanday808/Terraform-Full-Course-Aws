@@ -310,4 +310,5 @@ terraform destroy
 - **Local variables**: computed helper values
 - **Output variables**: final results
 - **Precedence**: Command line > tfvars > environment vars > defaults
-
+  
+Continue to Day 6 — AWS Terraform Structure Best Practices
