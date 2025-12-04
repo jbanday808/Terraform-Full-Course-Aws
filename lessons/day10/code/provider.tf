@@ -1,3 +1,6 @@
+############################################
+# TERRAFORM SETTINGS & PROVIDER REQUIREMENTS
+############################################
 terraform {
   required_version = ">= 1.0"
 
@@ -9,10 +12,16 @@ terraform {
   }
 }
 
+############################################
+# AWS PROVIDER CONFIGURATION
+############################################
 provider "aws" {
+  # Region comes from dev.tfvars or prod.tfvars
   region = var.aws_region
 
-  # Standard tags applied to all AWS resources
+  ############################################
+  # DEFAULT TAGS (APPLIED TO ALL RESOURCES)
+  ############################################
   default_tags {
     tags = {
       Project     = "Day10-Terraform-Expressions-Demo"
