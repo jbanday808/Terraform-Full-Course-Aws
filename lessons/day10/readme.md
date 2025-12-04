@@ -201,6 +201,7 @@ Proceed to **Day 11** to learn about Terraform's built-in functions and how to u
 - [Terraform Dynamic Blocks](https://www.terraform.io/language/expressions/dynamic-blocks)
 - [Terraform Splat Expressions](https://www.terraform.io/language/expressions/splat)
 - [Terraform For Expressions](https://www.terraform.io/language/expressions/for)
+- [Terraform aws_instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
 
 ---
 
