@@ -1,12 +1,22 @@
 # ==============================================================================
 # LABEL LEGEND (Quick Guide)
 # ==============================================================================
-# LABEL: Overview        → High-level description of the file or section.
-# LABEL: Local           → Local variable used for formatting, processing, logic.
-# LABEL: Resource        → AWS resource created by Terraform.
-# LABEL: Data Source     → External AWS data Terraform reads.
-# LABEL: Instructions    → Notes on how to test/modify a specific assignment.
-# LABEL: Structure       → Notes about JSON structures or configuration formats.
+# LABEL: Overview            → High-level description of the file or section.
+# LABEL: Local               → Local variable used for formatting, processing, logic.
+# LABEL: Resource            → AWS resource created by Terraform.
+# LABEL: Data Source         → External AWS data Terraform reads.
+# LABEL: Instructions        → Notes on how to test/modify a specific assignment.
+# LABEL: Structure           → Notes about JSON structures or configuration formats.
+#
+# FUNCTION CATEGORY LABELS (Diagram Alignment)
+# LABEL: String Function     → Uses string/text helpers (lower, replace, split, join, substr).
+# LABEL: Numeric Function    → Uses math helpers (abs, max, sum, length for counts).
+# LABEL: Collection Function → Works with lists/maps/sets (merge, concat, toset, for-expr).
+# LABEL: Type Conversion     → Converts between types (tonumber, jsonencode/jsondecode).
+# LABEL: File Function       → Works with files (file, fileexists, dirname).
+# LABEL: Validation Function → Enforces rules (regex, can, endswith).
+# LABEL: Lookup Function     → Pulls values from maps/lists safely (lookup, element).
+# LABEL: Date/Time Function  → Uses timestamp/formatdate/time helpers.
 # ==============================================================================
 
 
@@ -22,11 +32,12 @@
 # ==============================================================================
 # ASSIGNMENT 1
 # LABEL: Project Naming Convention
+# LABEL: String Function
 # Functions: lower(), replace()
 # ==============================================================================
 
 locals {
-  # LABEL: Local - formatted project name
+  # LABEL: Local - formatted project name (String Function)
   formatted_project_name = lower(replace(var.project_name, " ", "-"))
 }
 
@@ -54,29 +65,74 @@ resource "aws_resourcegroups_group" "project" {
 # ==============================================================================
 # ASSIGNMENT 2
 # LABEL: Resource Tagging
+# LABEL: Collection Function
 # Function: merge()
 # ==============================================================================
 
 locals {
-  # LABEL: Local - merged default + environment tags
+  # LABEL: Local - merged default + environment tags (Collection Function)
   merged_tags = merge(var.default_tags, var.environment_tags)
 }
 
 resource "aws_vpc" "tagged_vpc" {
   # LABEL: Resource - VPC with merged tags
   cidr_block = "10.0.0.0/16"
-  tags       = local.merged_tags
+
+  tags = local.merged_tags
+}
+
+# ------------------------------------------------------------------------------
+# DEFAULT NETWORKING METADATA FOR TAGGED_VPC
+# LABEL: NACL & Route Table for tagged_vpc
+# ------------------------------------------------------------------------------
+
+resource "aws_default_network_acl" "tagged_vpc_default_nacl" {
+  # LABEL: Resource - default NACL for tagged_vpc
+  default_network_acl_id = aws_vpc.tagged_vpc.default_network_acl_id
+
+  # Replicate default "allow all" behavior
+  ingress {
+    rule_no    = 100
+    protocol   = "-1"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  egress {
+    rule_no    = 100
+    protocol   = "-1"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  tags = {
+    Name = "sg-demo-nacl"
+  }
+}
+
+resource "aws_default_route_table" "tagged_vpc_default_rt" {
+  # LABEL: Resource - default route table for tagged_vpc
+  default_route_table_id = aws_vpc.tagged_vpc.default_route_table_id
+
+  tags = {
+    Name = "sg-demo-route-table"
+  }
 }
 
 
 # ==============================================================================
 # ASSIGNMENT 3
 # LABEL: S3 Bucket Naming
+# LABEL: String Function
 # Functions: substr(), replace(), lower()
 # ==============================================================================
 
 locals {
-  # LABEL: Local - formatted bucket name
+  # LABEL: Local - formatted bucket name (String Function)
   formatted_bucket_name = replace(
     replace(
       lower(substr(var.bucket_name, 0, 63)),
@@ -100,21 +156,24 @@ resource "aws_s3_bucket" "storage" {
 # ==============================================================================
 # ASSIGNMENT 4
 # LABEL: Security Group Port Configuration
-# Functions: split(), join(), for expression
+# LABEL: String Function
+# LABEL: Collection Function
+# LABEL: Type Conversion
+# Functions: split(), join(), for expression, tonumber()
 # ==============================================================================
 
 locals {
-  # LABEL: Local - port list
+  # LABEL: Local - port list (String Function → split)
   port_list = split(",", var.allowed_ports)
 
-  # LABEL: Local - SG rule objects
+  # LABEL: Local - SG rule objects (Collection Function → for-expression)
   sg_rules = [for port in local.port_list : {
     name        = "port-${port}"
     port        = port
     description = "Allow traffic on port ${port}"
   }]
 
-  # LABEL: Local - formatted port string for docs
+  # LABEL: Local - formatted port string for docs (String + Collection Functions)
   formatted_ports = join("-", [for port in local.port_list : "port-${port}"])
 }
 
@@ -128,6 +187,48 @@ resource "aws_vpc" "sg_vpc" {
   }
 }
 
+# ------------------------------------------------------------------------------
+# DEFAULT NETWORKING METADATA FOR SG_VPC
+# LABEL: NACL & Route Table for sg_vpc
+# ------------------------------------------------------------------------------
+
+resource "aws_default_network_acl" "sg_vpc_default_nacl" {
+  # LABEL: Resource - default NACL for sg_vpc
+  default_network_acl_id = aws_vpc.sg_vpc.default_network_acl_id
+
+  # Allow all (default-like behavior)
+  ingress {
+    rule_no    = 100
+    protocol   = "-1"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  egress {
+    rule_no    = 100
+    protocol   = "-1"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  tags = {
+    Name = "sg-demo-nacl"
+  }
+}
+
+resource "aws_default_route_table" "sg_vpc_default_rt" {
+  # LABEL: Resource - default route table for sg_vpc
+  default_route_table_id = aws_vpc.sg_vpc.default_route_table_id
+
+  tags = {
+    Name = "sg-demo-route-table"
+  }
+}
+
 resource "aws_security_group" "app_sg" {
   # LABEL: Resource - SG with dynamic ingress rules
   name        = "app-security-group"
@@ -135,9 +236,11 @@ resource "aws_security_group" "app_sg" {
   vpc_id      = aws_vpc.sg_vpc.id
 
   dynamic "ingress" {
+    # LABEL: Collection Function - dynamic for_each map
     for_each = { for rule in local.sg_rules : rule.name => rule }
     content {
       description = ingress.value.description
+      # LABEL: Type Conversion - tonumber()
       from_port   = tonumber(ingress.value.port)
       to_port     = tonumber(ingress.value.port)
       protocol    = "tcp"
@@ -161,9 +264,6 @@ resource "aws_security_group" "app_sg" {
 # ==============================================================================
 # SHARED NETWORKING FOR EC2 ASSIGNMENTS
 # LABEL: EC2 Networking
-# ==============================================================================
-# Provides a VPC, subnet, and security group so EC2 instances do not depend
-# on a default VPC (which may not exist in this account/region).
 # ==============================================================================
 
 resource "aws_vpc" "ec2_demo_vpc" {
@@ -224,15 +324,52 @@ resource "aws_security_group" "ec2_demo_sg" {
   }
 }
 
+resource "aws_default_network_acl" "ec2_demo_default_nacl" {
+  # LABEL: Resource - default NACL for ec2_demo_vpc
+  default_network_acl_id = aws_vpc.ec2_demo_vpc.default_network_acl_id
+
+  ingress {
+    rule_no    = 100
+    protocol   = "-1"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  egress {
+    rule_no    = 100
+    protocol   = "-1"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  tags = {
+    Name = "ec2-demo-nacl"
+  }
+}
+
+resource "aws_default_route_table" "ec2_demo_default_rt" {
+  # LABEL: Resource - default route table for ec2_demo_vpc
+  default_route_table_id = aws_vpc.ec2_demo_vpc.default_route_table_id
+
+  tags = {
+    Name = "ec2-demo-route-table"
+  }
+}
+
 
 # ==============================================================================
 # ASSIGNMENT 5
 # LABEL: Environment Configuration Lookup
+# LABEL: Lookup Function
 # Function: lookup()
 # ==============================================================================
 
 locals {
-  # LABEL: Local - pick instance type per environment
+  # LABEL: Local - pick instance type per environment (Lookup Function)
   instance_size = lookup(var.instance_sizes, var.environment, "t2.micro")
 }
 
@@ -266,6 +403,7 @@ resource "aws_instance" "app_server" {
 # ==============================================================================
 # ASSIGNMENT 6
 # LABEL: Instance Type Validation
+# LABEL: Validation Function
 # Functions: length(), can(), regex()
 # ==============================================================================
 
@@ -303,11 +441,12 @@ resource "aws_instance" "validated_instance" {
 # ==============================================================================
 # ASSIGNMENT 7
 # LABEL: Backup Configuration
+# LABEL: Validation Function
 # Functions: endswith(), sensitive()
 # ==============================================================================
 
 locals {
-  # LABEL: Local - backup configuration object
+  # LABEL: Local - backup configuration object (Validation + Sensitive)
   backup_config = {
     name       = var.backup_name
     credential = var.credential
@@ -319,6 +458,7 @@ locals {
 # ==============================================================================
 # ASSIGNMENT 8
 # LABEL: File Path Processing
+# LABEL: File Function
 # Functions: fileexists(), dirname(), file()
 # ==============================================================================
 
@@ -329,10 +469,10 @@ locals {
     "./configs/variables.tf"
   ]
 
-  # LABEL: Local - file exists map
+  # LABEL: Local - file exists map (File Function)
   file_status = { for path in local.config_files : path => fileexists(path) }
 
-  # LABEL: Local - directory names map
+  # LABEL: Local - directory names map (File Function)
   config_dirs = { for path in local.config_files : path => dirname(path) }
 }
 
@@ -340,14 +480,15 @@ locals {
 # ==============================================================================
 # ASSIGNMENT 9
 # LABEL: Resource Location Management
+# LABEL: Collection Function
 # Functions: toset(), concat()
 # ==============================================================================
 
 locals {
-  # LABEL: Local - merged location list
+  # LABEL: Local - merged location list (Collection Function → concat)
   all_locations = concat(var.user_locations, var.default_locations)
 
-  # LABEL: Local - unique locations
+  # LABEL: Local - unique locations (Collection Function → toset)
   unique_locations = toset(local.all_locations)
 }
 
@@ -355,20 +496,22 @@ locals {
 # ==============================================================================
 # ASSIGNMENT 10
 # LABEL: Cost Calculation
-# Functions: abs(), max(), sum(), for expression
+# LABEL: Numeric Function
+# LABEL: Collection Function
+# Functions: abs(), max(), sum(), length(), for expression
 # ==============================================================================
 
 locals {
-  # LABEL: Local - convert negative amounts to positive
+  # LABEL: Local - convert negative amounts to positive (Numeric Function → abs)
   positive_costs = [for cost in var.monthly_costs : abs(cost)]
 
-  # LABEL: Local - highest cost
+  # LABEL: Local - highest cost (Numeric Function → max)
   max_cost = max(local.positive_costs...)
 
-  # LABEL: Local - total cost
+  # LABEL: Local - total cost (Numeric Function → sum)
   total_cost = sum(local.positive_costs)
 
-  # LABEL: Local - average cost
+  # LABEL: Local - average cost (Numeric + Collection → length)
   avg_cost = local.total_cost / length(local.positive_costs)
 }
 
@@ -376,17 +519,18 @@ locals {
 # ==============================================================================
 # ASSIGNMENT 11
 # LABEL: Timestamp Management
+# LABEL: Date/Time Function
 # Functions: timestamp(), formatdate()
 # ==============================================================================
 
 locals {
-  # LABEL: Local - timestamp
+  # LABEL: Local - timestamp (Date/Time Function)
   current_timestamp = timestamp()
 
-  # LABEL: Local - YYYYMMDD suffix for names
+  # LABEL: Local - YYYYMMDD suffix for names (Date/Time Function)
   resource_date_suffix = formatdate("YYYYMMDD", local.current_timestamp)
 
-  # LABEL: Local - DD-MM-YYYY for tags
+  # LABEL: Local - DD-MM-YYYY for tags (Date/Time Function)
   tag_date_format = formatdate("DD-MM-YYYY", local.current_timestamp)
 
   # LABEL: Local - timestamped backup name (daily-backup-YYYYMMDD)
@@ -408,7 +552,9 @@ resource "aws_s3_bucket" "timestamped_bucket" {
 # ==============================================================================
 # ASSIGNMENT 12
 # LABEL: File Content Handling
-# Functions: file(), jsondecode(), sensitive()
+# LABEL: File Function
+# LABEL: Type Conversion
+# Functions: file(), fileexists(), jsondecode(), jsonencode()
 # ==============================================================================
 
 # LABEL: Structure - expected config.json
@@ -421,10 +567,10 @@ resource "aws_s3_bucket" "timestamped_bucket" {
 # }
 
 locals {
-  # LABEL: Local - does config.json exist?
+  # LABEL: Local - does config.json exist? (File Function)
   config_file_exists = fileexists("./config.json")
 
-  # LABEL: Local - parsed or fallback config
+  # LABEL: Local - parsed or fallback config (File + Type Conversion)
   config_data = local.config_file_exists ? jsondecode(file("./config.json")) : {
     database = {
       host     = "localhost"
@@ -447,7 +593,7 @@ resource "aws_secretsmanager_secret" "app_config" {
 }
 
 resource "aws_secretsmanager_secret_version" "app_config_version" {
-  # LABEL: Resource - secret version containing JSON config
+  # LABEL: Resource - secret version containing JSON config (Type Conversion → jsonencode)
   secret_id     = aws_secretsmanager_secret.app_config.id
   secret_string = jsonencode(local.config_data)
 }
