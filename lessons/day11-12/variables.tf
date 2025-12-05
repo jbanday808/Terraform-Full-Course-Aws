@@ -11,6 +11,7 @@ variable "aws_region" {
 # ==============================================================================
 # ASSIGNMENT 1
 # LABEL: Project Naming Convention
+# LABEL: String Function   # lower(), replace() used in main.tf
 # ==============================================================================
 variable "project_name" {
   type        = string
@@ -21,6 +22,7 @@ variable "project_name" {
 # ==============================================================================
 # ASSIGNMENT 2
 # LABEL: Resource Tagging
+# LABEL: Collection Function   # merge() used in main.tf
 # ==============================================================================
 variable "default_tags" {
   type        = map(string)
@@ -45,6 +47,7 @@ variable "environment_tags" {
 # ==============================================================================
 # ASSIGNMENT 3
 # LABEL: S3 Bucket Naming
+# LABEL: String Function   # substr(), lower(), replace() used in main.tf
 # ==============================================================================
 variable "bucket_name" {
   type        = string
@@ -55,6 +58,7 @@ variable "bucket_name" {
 # ==============================================================================
 # ASSIGNMENT 4
 # LABEL: Security Group Port Configuration
+# LABEL: String Function      # split() used in main.tf
 # ==============================================================================
 variable "allowed_ports" {
   type        = string
@@ -65,6 +69,8 @@ variable "allowed_ports" {
 # ==============================================================================
 # ASSIGNMENT 5
 # LABEL: Environment Configuration Lookup
+# LABEL: Lookup Function      # lookup() used in main.tf
+# LABEL: Validation Function  # contains() used here
 # ==============================================================================
 variable "environment" {
   type        = string
@@ -91,17 +97,20 @@ variable "instance_sizes" {
 # ==============================================================================
 # ASSIGNMENT 6
 # LABEL: Instance Type Validation
+# LABEL: Validation Function   # length(), regex(), can() used here
 # ==============================================================================
 variable "instance_type" {
   type        = string
   description = "EC2 instance type used for validation tests"
   default     = "t2.micro"
 
+  # LENGTH CHECK (Validation + Numeric Function: length)
   validation {
     condition     = length(var.instance_type) >= 2 && length(var.instance_type) <= 20
     error_message = "Instance type must be between 2 and 20 characters"
   }
 
+  # PATTERN CHECK (Validation Function: regex(), can())
   validation {
     condition     = can(regex("^t[2-3]\\.", var.instance_type))
     error_message = "Instance type must start with t2 or t3"
@@ -111,6 +120,7 @@ variable "instance_type" {
 # ==============================================================================
 # ASSIGNMENT 7
 # LABEL: Backup Configuration
+# LABEL: Validation Function   # endswith() used here
 # ==============================================================================
 variable "backup_name" {
   type        = string
@@ -133,6 +143,7 @@ variable "credential" {
 # ==============================================================================
 # ASSIGNMENT 9
 # LABEL: Resource Location Management
+# LABEL: Collection Function   # concat(), toset() used in main.tf
 # ==============================================================================
 variable "user_locations" {
   type        = list(string)
@@ -149,6 +160,7 @@ variable "default_locations" {
 # ==============================================================================
 # ASSIGNMENT 10
 # LABEL: Cost Calculation
+# LABEL: Numeric Function   # abs(), max(), sum() used in main.tf
 # ==============================================================================
 variable "monthly_costs" {
   type        = list(number)
