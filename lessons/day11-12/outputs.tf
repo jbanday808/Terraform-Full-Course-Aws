@@ -42,13 +42,23 @@ output "tagged_vpc_tags" {
   value       = aws_vpc.tagged_vpc.tags
 }
 
+output "tagged_vpc_default_nacl_name" {
+  description = "Name tag of the default NACL for tagged_vpc"
+  value       = aws_default_network_acl.tagged_vpc_default_nacl.tags["Name"]
+}
+
+output "tagged_vpc_default_route_table_name" {
+  description = "Name tag of the default route table for tagged_vpc"
+  value       = aws_default_route_table.tagged_vpc_default_rt.tags["Name"]
+}
+
 
 # ==============================================================================
 # ASSIGNMENT 3
 # LABEL: S3 Bucket Naming
 # ==============================================================================
 output "storage_bucket_name" {
-  description = "Final formatted S3 bucket name"
+  description = "Final formatted S3 bucket name created for storage"
   value       = aws_s3_bucket.storage.bucket
 }
 
@@ -57,8 +67,13 @@ output "storage_bucket_name" {
 # ASSIGNMENT 4
 # LABEL: Security Group Port Configuration
 # ==============================================================================
+output "sg_demo_vpc_id" {
+  description = "ID of the VPC used for the security group demo"
+  value       = aws_vpc.sg_vpc.id
+}
+
 output "security_group_id" {
-  description = "ID of the dynamic security group"
+  description = "ID of the dynamic security group with port rules"
   value       = aws_security_group.app_sg.id
 }
 
@@ -70,6 +85,46 @@ output "security_group_vpc_id" {
 output "formatted_ports_documentation" {
   description = "Ports formatted as a single documentation string"
   value       = local.formatted_ports
+}
+
+output "sg_vpc_default_nacl_name" {
+  description = "Name tag of the default NACL for sg_vpc"
+  value       = aws_default_network_acl.sg_vpc_default_nacl.tags["Name"]
+}
+
+output "sg_vpc_default_route_table_name" {
+  description = "Name tag of the default route table for sg_vpc"
+  value       = aws_default_route_table.sg_vpc_default_rt.tags["Name"]
+}
+
+
+# ==============================================================================
+# SHARED EC2 NETWORKING
+# LABEL: EC2 Demo VPC, Subnet, SG, NACL, Route Table
+# ==============================================================================
+output "ec2_demo_vpc_id" {
+  description = "ID of the VPC used for EC2 demo instances"
+  value       = aws_vpc.ec2_demo_vpc.id
+}
+
+output "ec2_demo_subnet_id" {
+  description = "ID of the subnet used for EC2 demo instances"
+  value       = aws_subnet.ec2_demo_subnet.id
+}
+
+output "ec2_demo_sg_id" {
+  description = "ID of the security group used for EC2 demo instances"
+  value       = aws_security_group.ec2_demo_sg.id
+}
+
+output "ec2_demo_default_nacl_name" {
+  description = "Name tag of the default NACL for ec2_demo_vpc"
+  value       = aws_default_network_acl.ec2_demo_default_nacl.tags["Name"]
+}
+
+output "ec2_demo_default_route_table_name" {
+  description = "Name tag of the default route table for ec2_demo_vpc"
+  value       = aws_default_route_table.ec2_demo_default_rt.tags["Name"]
 }
 
 
@@ -176,7 +231,7 @@ output "average_monthly_cost" {
 # LABEL: Timestamp Management
 # ==============================================================================
 output "timestamped_bucket_name" {
-  description = "Name of the timestamped backup bucket"
+  description = "Name of the timestamped backup bucket (daily-backup-YYYYMMDD)"
   value       = aws_s3_bucket.timestamped_bucket.bucket
 }
 
