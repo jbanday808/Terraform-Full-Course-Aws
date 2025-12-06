@@ -250,6 +250,11 @@ output "maximum_monthly_cost" {
   value       = local.max_cost
 }
 
+output "minimum_monthly_cost" {
+  description = "Lowest monthly cost after conversion using min()"
+  value       = local.min_cost
+}
+
 output "total_monthly_cost" {
   description = "Sum of all monthly costs (absolute values) using sum()"
   value       = local.total_cost
