@@ -179,14 +179,22 @@ output "validated_instance_type" {
 # ASSIGNMENT 7
 # LABEL: Backup Configuration
 # LABEL: Validation Function
+# Functions: endswith(), sensitive()
 # ==============================================================================
 
+# Non-sensitive summary (does NOT expose credential)
 output "backup_configuration" {
-  description = "Backup configuration summary (name validated with endswith, credential marked sensitive)"
+  description = "Backup configuration summary (name validated with endswith, credential kept sensitive)"
   value = {
     name    = local.backup_config.name
     enabled = local.backup_config.enabled
   }
+}
+
+# Full backup config marked as sensitive (demonstrates sensitive() end-to-end)
+output "backup_configuration_sensitive" {
+  description = "Full backup configuration object, marked sensitive so credential is not shown in plan output"
+  value       = sensitive(local.backup_config)
 }
 
 
