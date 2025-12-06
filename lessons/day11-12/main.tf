@@ -446,13 +446,21 @@ resource "aws_instance" "validated_instance" {
 # ==============================================================================
 
 locals {
-  # LABEL: Local - backup configuration object (Validation + Sensitive)
+  # LABEL: Local - enforce backup_name endswith() rule (double validation)
+  valid_backup_name = (
+    endswith(var.backup_name, "_backup")
+      ? var.backup_name
+      : "_invalid_backup_name"
+  )
+
+  # LABEL: Local - backup configuration object (sensitive + validated)
   backup_config = {
-    name       = var.backup_name
-    credential = var.credential
+    name       = local.valid_backup_name
+    credential = sensitive(var.credential)   # <── sensitive() applied here
     enabled    = true
   }
 }
+
 
 
 # ==============================================================================
