@@ -112,7 +112,6 @@ output "sg_vpc_default_route_table_name" {
 # ==============================================================================
 # SHARED EC2 NETWORKING
 # LABEL: EC2 Demo VPC, Subnet, SG, NACL, Route Table
-# LABEL: Lookup Function (Assignments 5 & 6 use lookup/validation on this network)
 # ==============================================================================
 
 output "ec2_demo_vpc_id" {
@@ -165,7 +164,7 @@ output "app_server_instance_type" {
 # ==============================================================================
 
 output "validated_instance_id" {
-  description = "EC2 instance ID created using the validated instance type (regex/can/length)"
+  description = "EC2 instance ID created using the validated instance type (length/regex/can)"
   value       = aws_instance.validated_instance.id
 }
 
@@ -179,23 +178,14 @@ output "validated_instance_type" {
 # ASSIGNMENT 7
 # LABEL: Backup Configuration
 # LABEL: Validation Function
-# LABEL: endswith(), sensitive()
 # ==============================================================================
 
-# Non-sensitive summary output
 output "backup_configuration" {
-  description = "Backup configuration (name validated with endswith, credential hidden)"
+  description = "Backup configuration summary (name validated with endswith, credential sensitive)"
   value = {
     name    = local.backup_config.name
     enabled = local.backup_config.enabled
   }
-}
-
-# Sensitive full configuration object
-output "backup_configuration_sensitive" {
-  description = "Full backup configuration including sensitive credential"
-  value       = sensitive(local.backup_config)
-  sensitive   = true
 }
 
 
@@ -262,10 +252,9 @@ output "total_monthly_cost" {
 }
 
 output "average_monthly_cost" {
-  description = "Average monthly cost across all entries (Numeric + Collection Functions → sum()/length())"
+  description = "Average monthly cost across all entries (sum()/length())"
   value       = local.avg_cost
 }
-
 
 
 # ==============================================================================
@@ -275,7 +264,7 @@ output "average_monthly_cost" {
 # ==============================================================================
 
 output "timestamped_bucket_name" {
-  description = "Name of the timestamped backup bucket (daily-backup-YYYYMMDD)"
+  description = "Name of the timestamped backup bucket (daily-backup-YYYYMMDD) built with timestamp()/formatdate()"
   value       = aws_s3_bucket.timestamped_bucket.bucket
 }
 
@@ -308,11 +297,11 @@ output "config_file_exists" {
 }
 
 output "config_database_settings" {
-  description = "Database configuration loaded from config.json or default (file/jsondecode)"
+  description = "Database configuration loaded from config.json or default using file()/jsondecode()"
   value       = local.config_data.database
 }
 
 output "app_config_secret_arn" {
-  description = "ARN of the AWS Secrets Manager secret storing app config (jsonencode used in secret version)"
+  description = "ARN of the AWS Secrets Manager secret that stores app config (jsonencode() used in secret version)"
   value       = aws_secretsmanager_secret.app_config.arn
 }
