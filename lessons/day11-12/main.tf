@@ -10,7 +10,7 @@
 #
 # FUNCTION CATEGORY LABELS (Diagram Alignment)
 # LABEL: String Function     → Uses string/text helpers (lower, replace, split, join, substr).
-# LABEL: Numeric Function    → Uses math helpers (abs, max, sum, length for counts).
+# LABEL: Numeric Function    → Uses math helpers (abs, max, min, sum, length for counts).
 # LABEL: Collection Function → Works with lists/maps/sets (merge, concat, toset, for-expr).
 # LABEL: Type Conversion     → Converts between types (tonumber, jsonencode/jsondecode).
 # LABEL: File Function       → Works with files (file, fileexists, dirname).
@@ -456,11 +456,10 @@ locals {
   # LABEL: Local - backup configuration object (sensitive + validated)
   backup_config = {
     name       = local.valid_backup_name
-    credential = sensitive(var.credential)   # <── sensitive() applied here
+    credential = sensitive(var.credential)
     enabled    = true
   }
 }
-
 
 
 # ==============================================================================
@@ -506,7 +505,7 @@ locals {
 # LABEL: Cost Calculation
 # LABEL: Numeric Function
 # LABEL: Collection Function
-# Functions: abs(), max(), sum(), length(), for expression
+# Functions: abs(), max(), min(), sum(), length(), for expression
 # ==============================================================================
 
 locals {
@@ -515,6 +514,9 @@ locals {
 
   # LABEL: Local - highest cost (Numeric Function → max)
   max_cost = max(local.positive_costs...)
+
+  # LABEL: Local - lowest cost (Numeric Function → min)
+  min_cost = min(local.positive_costs...)
 
   # LABEL: Local - total cost (Numeric Function → sum)
   total_cost = sum(local.positive_costs)
