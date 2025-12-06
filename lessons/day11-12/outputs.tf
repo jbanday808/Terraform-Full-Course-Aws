@@ -238,32 +238,34 @@ output "unique_locations" {
 # LABEL: Cost Calculation
 # LABEL: Numeric Function
 # LABEL: Collection Function
+# Functions: abs(), max(), min(), sum(), length()
 # ==============================================================================
 
 output "positive_costs" {
-  description = "Monthly costs converted to absolute values using abs()"
+  description = "Monthly costs converted to absolute values (Numeric Function → abs)"
   value       = local.positive_costs
 }
 
 output "maximum_monthly_cost" {
-  description = "Highest monthly cost after conversion using max()"
+  description = "Highest monthly cost after conversion (Numeric Function → max)"
   value       = local.max_cost
 }
 
 output "minimum_monthly_cost" {
-  description = "Lowest monthly cost after conversion using min()"
+  description = "Lowest monthly cost after conversion (Numeric Function → min)"
   value       = local.min_cost
 }
 
 output "total_monthly_cost" {
-  description = "Sum of all monthly costs (absolute values) using sum()"
+  description = "Total of monthly costs converted to positive values (Numeric Function → sum)"
   value       = local.total_cost
 }
 
 output "average_monthly_cost" {
-  description = "Average monthly cost (sum()/length())"
+  description = "Average monthly cost across all entries (Numeric + Collection Functions → sum()/length())"
   value       = local.avg_cost
 }
+
 
 
 # ==============================================================================
