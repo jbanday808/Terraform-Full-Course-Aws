@@ -212,7 +212,7 @@ Load a JSON config, decode it, and prepare it for Secrets Manager
 
 ## 🚀 Next Steps
 
-You are now ready for Day 13: Terraform Workspaces, where you separate dev, test, and prod environments.
+Continue Day 13: Terraform Workspaces, where you separate dev, test, and prod environments.
 
 ---
 
