@@ -165,7 +165,7 @@ output "app_server_instance_type" {
 # ==============================================================================
 
 output "validated_instance_id" {
-  description = "EC2 instance ID created using the validated instance type (regex/can/length in variable)"
+  description = "EC2 instance ID created using the validated instance type (regex/can/length)"
   value       = aws_instance.validated_instance.id
 }
 
@@ -179,22 +179,23 @@ output "validated_instance_type" {
 # ASSIGNMENT 7
 # LABEL: Backup Configuration
 # LABEL: Validation Function
-# Functions: endswith(), sensitive()
+# LABEL: endswith(), sensitive()
 # ==============================================================================
 
-# Non-sensitive summary (does NOT expose credential)
+# Non-sensitive summary output
 output "backup_configuration" {
-  description = "Backup configuration summary (name validated with endswith, credential kept sensitive)"
+  description = "Backup configuration (name validated with endswith, credential hidden)"
   value = {
     name    = local.backup_config.name
     enabled = local.backup_config.enabled
   }
 }
 
-# Full backup config marked as sensitive (demonstrates sensitive() end-to-end)
+# Sensitive full configuration object
 output "backup_configuration_sensitive" {
-  description = "Full backup configuration object, marked sensitive so credential is not shown in plan output"
+  description = "Full backup configuration including sensitive credential"
   value       = sensitive(local.backup_config)
+  sensitive   = true
 }
 
 
@@ -240,7 +241,7 @@ output "unique_locations" {
 # ==============================================================================
 
 output "positive_costs" {
-  description = "Monthly costs converted to positive values using abs()"
+  description = "Monthly costs converted to absolute values using abs()"
   value       = local.positive_costs
 }
 
@@ -255,7 +256,7 @@ output "total_monthly_cost" {
 }
 
 output "average_monthly_cost" {
-  description = "Average monthly cost across all entries (sum()/length())"
+  description = "Average monthly cost (sum()/length())"
   value       = local.avg_cost
 }
 
@@ -267,7 +268,7 @@ output "average_monthly_cost" {
 # ==============================================================================
 
 output "timestamped_bucket_name" {
-  description = "Name of the timestamped backup bucket (daily-backup-YYYYMMDD) built with timestamp()/formatdate()"
+  description = "Name of the timestamped backup bucket (daily-backup-YYYYMMDD)"
   value       = aws_s3_bucket.timestamped_bucket.bucket
 }
 
@@ -300,11 +301,11 @@ output "config_file_exists" {
 }
 
 output "config_database_settings" {
-  description = "Database configuration loaded from config.json or default using file()/jsondecode()"
+  description = "Database configuration loaded from config.json or default (file/jsondecode)"
   value       = local.config_data.database
 }
 
 output "app_config_secret_arn" {
-  description = "ARN of the AWS Secrets Manager secret that stores app config (jsonencode() used in secret version)"
+  description = "ARN of the AWS Secrets Manager secret storing app config (jsonencode used in secret version)"
   value       = aws_secretsmanager_secret.app_config.arn
 }
