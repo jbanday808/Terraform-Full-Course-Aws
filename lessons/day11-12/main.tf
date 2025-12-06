@@ -449,8 +449,8 @@ locals {
   # LABEL: Local - enforce backup_name endswith() rule (double validation)
   valid_backup_name = (
     endswith(var.backup_name, "_backup")
-      ? var.backup_name
-      : "_invalid_backup_name"
+    ? var.backup_name
+    : "_invalid_backup_name"
   )
 
   # LABEL: Local - backup configuration object (sensitive + validated)
@@ -509,21 +509,27 @@ locals {
 # ==============================================================================
 
 locals {
-  # LABEL: Local - convert negative amounts to positive (Numeric Function → abs)
+  # LABEL: Local - convert negative amounts to positive
+  # Terraform Function: abs()
   positive_costs = [for cost in var.monthly_costs : abs(cost)]
 
-  # LABEL: Local - highest cost (Numeric Function → max)
+  # LABEL: Local - highest monthly cost
+  # Terraform Function: max()
   max_cost = max(local.positive_costs...)
 
-  # LABEL: Local - lowest cost (Numeric Function → min)
+  # LABEL: Local - lowest monthly cost
+  # Terraform Function: min()
   min_cost = min(local.positive_costs...)
 
-  # LABEL: Local - total cost (Numeric Function → sum)
+  # LABEL: Local - sum of all monthly costs
+  # Terraform Function: sum()
   total_cost = sum(local.positive_costs)
 
-  # LABEL: Local - average cost (Numeric + Collection → length)
+  # LABEL: Local - average cost across all entries
+  # Terraform Function: length()
   avg_cost = local.total_cost / length(local.positive_costs)
 }
+
 
 
 # ==============================================================================
