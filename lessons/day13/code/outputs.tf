@@ -1,7 +1,9 @@
 output "instance_id" {
-  value = aws_instance.main.id
+  description = "ID of the EC2 instance launched into the shared EKS subnet"
+  value       = aws_instance.day13_ec2.id
 }
 
 output "instance_private_ip" {
-  value = aws_instance.main.private_ip
+  description = "Private IP address of the EC2 instance"
+  value       = aws_instance.day13_ec2.private_ip
 }
