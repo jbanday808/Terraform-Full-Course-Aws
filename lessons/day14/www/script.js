@@ -1,150 +1,183 @@
-// Counter functionality
-let counter = 0;
-const counterButton = document.getElementById('counterButton');
-const counterSpan = document.getElementById('counter');
+// ====== Helpers ======
+function $(id) {
+  return document.getElementById(id);
+}
 
-counterButton.addEventListener('click', function() {
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.remove(), 2000);
+}
+
+// ====== Elements ======
+const counterButton = $("counterButton");
+const counterSpan = $("counter");
+const colorButton = $("colorButton");
+const statusElement = $("status");
+
+// ====== State (persisted) ======
+let counter = Number(localStorage.getItem("clickCounter") || 0);
+let isDarkTheme = localStorage.getItem("darkTheme") === "true";
+
+// ====== Init on load ======
+document.addEventListener("DOMContentLoaded", () => {
+  // Restore counter
+  if (counterSpan) counterSpan.textContent = counter;
+
+  // Restore theme
+  if (isDarkTheme) {
+    document.body.classList.add("dark-theme");
+    if (colorButton) colorButton.textContent = "Light Theme";
+  } else {
+    if (colorButton) colorButton.textContent = "Dark Theme";
+  }
+
+  // Animate cards
+  animateOnLoad();
+
+  // Status rotation
+  updateStatus();
+  setInterval(updateStatus, 4000);
+
+  // Hover effects
+  addCardHoverEffects();
+});
+
+// ====== Counter functionality ======
+if (counterButton && counterSpan) {
+  counterButton.addEventListener("click", () => {
     counter++;
     counterSpan.textContent = counter;
-    
-    // Add some visual feedback
-    counterButton.style.transform = 'scale(0.95)';
-    setTimeout(() => {
-        counterButton.style.transform = 'scale(1)';
-    }, 100);
-    
-    // Show celebration at milestones
+
+    // Save counter
+    localStorage.setItem("clickCounter", String(counter));
+
+    // Button feedback (uses .btn.pressed in CSS)
+    counterButton.classList.add("pressed");
+    setTimeout(() => counterButton.classList.remove("pressed"), 150);
+
+    // Milestones
     if (counter % 10 === 0) {
-        showCelebration();
+      showCelebration();
+      showToast("🎉 Milestone reached!");
+    } else if (counter % 5 === 0) {
+      showToast("✅ Nice progress!");
     }
-});
+  });
+}
 
-// Theme toggle functionality
-const colorButton = document.getElementById('colorButton');
-let isDarkTheme = false;
-
-colorButton.addEventListener('click', function() {
+// ====== Theme toggle ======
+if (colorButton) {
+  colorButton.addEventListener("click", () => {
     isDarkTheme = !isDarkTheme;
-    document.body.classList.toggle('dark-theme');
-    
-    colorButton.textContent = isDarkTheme ? 'Light Theme' : 'Dark Theme';
-    
-    // Save preference to localStorage
-    localStorage.setItem('darkTheme', isDarkTheme);
-});
+    document.body.classList.toggle("dark-theme");
 
-// Load saved theme preference
-document.addEventListener('DOMContentLoaded', function() {
-    const savedTheme = localStorage.getItem('darkTheme');
-    if (savedTheme === 'true') {
-        isDarkTheme = true;
-        document.body.classList.add('dark-theme');
-        colorButton.textContent = 'Light Theme';
-    }
-    
-    // Animate elements on page load
-    animateOnLoad();
-    
-    // Update status periodically
-    updateStatus();
-    setInterval(updateStatus, 5000);
-});
+    colorButton.textContent = isDarkTheme ? "Light Theme" : "Dark Theme";
+    localStorage.setItem("darkTheme", String(isDarkTheme));
 
-// Animation on page load
+    showToast(isDarkTheme ? "🌙 Dark Theme Enabled" : "☀️ Light Theme Enabled");
+  });
+}
+
+// ====== Animation on page load ======
 function animateOnLoad() {
-    const cards = document.querySelectorAll('.feature-card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            card.style.transition = 'all 0.6s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 200);
-    });
+  const cards = document.querySelectorAll(".feature-card");
+  cards.forEach((card, index) => {
+    card.style.opacity = "0";
+    card.style.transform = "translateY(16px)";
+
+    setTimeout(() => {
+      card.style.transition = "all 0.5s ease";
+      card.style.opacity = "1";
+      card.style.transform = "translateY(0)";
+    }, index * 120);
+  });
 }
 
-// Celebration effect
+// ====== Celebration effect ======
 function showCelebration() {
-    const celebration = document.createElement('div');
-    celebration.innerHTML = '🎉';
-    celebration.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 4rem;
-        pointer-events: none;
-        z-index: 1000;
-        animation: celebrate 1s ease-out forwards;
-    `;
-    
-    // Add celebration animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes celebrate {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
-    document.body.appendChild(celebration);
-    
-    setTimeout(() => {
-        document.body.removeChild(celebration);
-        document.head.removeChild(style);
-    }, 1000);
-}
+  const celebration = document.createElement("div");
+  celebration.textContent = "🎉";
+  celebration.style.cssText = `
+    position: fixed;
+    top: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3rem;
+    pointer-events: none;
+    z-index: 1000;
+    animation: pop 1s ease-out forwards;
+  `;
 
-// Status updates
-function updateStatus() {
-    const statuses = ['Active', 'Optimized', 'Secure', 'Fast'];
-    const statusElement = document.getElementById('status');
-    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-    
-    statusElement.style.opacity = '0.5';
-    setTimeout(() => {
-        statusElement.textContent = randomStatus;
-        statusElement.style.opacity = '1';
-    }, 300);
-}
-
-// Add some interactive hover effects
-document.addEventListener('DOMContentLoaded', function() {
-    const featureCards = document.querySelectorAll('.feature-card');
-    
-    featureCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-10px) scale(1.02)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
-});
-
-// Add keyboard navigation
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Space') {
-        e.preventDefault();
-        counterButton.click();
-    } else if (e.key === 't' || e.key === 'T') {
-        colorButton.click();
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes pop {
+      0% { transform: translateX(-50%) scale(0.6); opacity: 0; }
+      30% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+      100% { transform: translateX(-50%) scale(1.6); opacity: 0; }
     }
+  `;
+
+  document.head.appendChild(style);
+  document.body.appendChild(celebration);
+
+  setTimeout(() => {
+    celebration.remove();
+    style.remove();
+  }, 1000);
+}
+
+// ====== Status updates ======
+function updateStatus() {
+  if (!statusElement) return;
+
+  const statuses = ["Optimized", "Secure", "Fast", "Highly Available"];
+  const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+
+  statusElement.style.opacity = "0.5";
+  setTimeout(() => {
+    statusElement.textContent = randomStatus;
+    statusElement.style.opacity = "1";
+  }, 250);
+}
+
+// ====== Card hover effects ======
+function addCardHoverEffects() {
+  const featureCards = document.querySelectorAll(".feature-card");
+
+  featureCards.forEach((card) => {
+    card.addEventListener("mouseenter", function () {
+      this.style.transform = "translateY(-10px) scale(1.02)";
+    });
+
+    card.addEventListener("mouseleave", function () {
+      this.style.transform = "translateY(0) scale(1)";
+    });
+  });
+}
+
+// ====== Keyboard shortcuts ======
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    e.preventDefault();
+    counterButton?.click();
+  }
+
+  if (e.key === "t" || e.key === "T") {
+    colorButton?.click();
+  }
 });
 
-// Performance monitoring
-window.addEventListener('load', function() {
-    const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
-    console.log(`Page loaded in ${loadTime}ms`);
-    
-    // Show load time in console for demo purposes
-    setTimeout(() => {
-        console.log('🚀 AWS Static Website Demo loaded successfully!');
-        console.log('📊 Features: S3 + CloudFront + Terraform');
-        console.log('⌨️  Keyboard shortcuts: Space (counter), T (theme)');
-    }, 1000);
+// ====== Basic performance logging ======
+window.addEventListener("load", () => {
+  const timing = window.performance?.timing;
+  if (!timing) return;
+
+  const loadTime = timing.loadEventEnd - timing.navigationStart;
+  console.log(`Page loaded in ${loadTime}ms`);
+  console.log("🚀 Demo: S3 + CloudFront + Terraform");
+  console.log("⌨️ Shortcuts: Space (counter), T (theme)");
 });
