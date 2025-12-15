@@ -1,6 +1,12 @@
-# S3 bucket for static website hosting
+# S3 bucket for static website content (private + CloudFront OAC)
 resource "aws_s3_bucket" "website" {
-  bucket_prefix = var.bucket_prefix
+  bucket = var.bucket_name
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-${var.environment}-s3"
+    Project     = var.project_name
+    Environment = var.environment
+  })
 }
 
 # Make S3 bucket private
@@ -15,13 +21,14 @@ resource "aws_s3_bucket_public_access_block" "website" {
 
 # Origin Access Control for CloudFront (Recommended over OAI)
 resource "aws_cloudfront_origin_access_control" "oac" {
-  name                              = "oac-${var.bucket_prefix}"
-  description                       = "OAC for static website"
+  name                              = "oac-${var.project_name}-${var.environment}"
+  description                       = "OAC for ${var.project_name} static website"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
 
+# Allow CloudFront to read objects from the private bucket
 resource "aws_s3_bucket_policy" "website" {
   bucket = aws_s3_bucket.website.id
 
@@ -56,6 +63,7 @@ resource "aws_s3_object" "website_files" {
   key    = each.value
   source = "${path.module}/www/${each.value}"
   etag   = filemd5("${path.module}/www/${each.value}")
+
   content_type = lookup({
     "html" = "text/html",
     "css"  = "text/css",
@@ -70,8 +78,6 @@ resource "aws_s3_object" "website_files" {
     "txt"  = "text/plain"
   }, split(".", each.value)[length(split(".", each.value)) - 1], "application/octet-stream")
 }
-
-
 
 # CloudFront Distribution
 resource "aws_cloudfront_distribution" "s3_distribution" {
@@ -90,6 +96,8 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "S3-${aws_s3_bucket.website.id}"
 
+    viewer_protocol_policy = "redirect-to-https"
+
     forwarded_values {
       query_string = false
       cookies {
@@ -97,10 +105,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
       }
     }
 
-    viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    min_ttl     = 0
+    default_ttl = 3600
+    max_ttl     = 86400
   }
 
   price_class = "PriceClass_100"
@@ -114,4 +121,10 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   viewer_certificate {
     cloudfront_default_certificate = true
   }
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-${var.environment}-cloudfront"
+    Project     = var.project_name
+    Environment = var.environment
+  })
 }
