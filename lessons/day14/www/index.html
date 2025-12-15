@@ -14,47 +14,103 @@
 
     <!-- Hero -->
     <header class="hero">
+      <div class="hero-badge">Deployed with Terraform • Delivered by CloudFront</div>
       <h1 class="hero-title">🚀 AWS Static Website</h1>
       <p class="hero-subtitle">
-        Secure, Fast, and Globally Distributed using S3, CloudFront & Terraform
+        Secure, fast, and globally distributed using S3, CloudFront, and Terraform.
       </p>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#architecture">View Architecture</a>
+        <a class="btn btn-secondary" href="#demo">Try Demo</a>
+      </div>
     </header>
 
     <main class="content">
 
+      <!-- Overview -->
+      <section class="info-section" id="overview">
+        <h2>Project Summary</h2>
+
+        <p class="lead">
+          This website is stored in a <strong>private S3 bucket</strong> and delivered through
+          <strong>CloudFront edge locations</strong>. Terraform provisions the full stack so deployments
+          are consistent, repeatable, and easy to update.
+        </p>
+
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-label">Origin</div>
+            <div class="stat-value">Private S3 Bucket</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Delivery</div>
+            <div class="stat-value">CloudFront CDN</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Deploy</div>
+            <div class="stat-value">Terraform IaC</div>
+          </div>
+        </div>
+      </section>
+
       <!-- Features -->
-      <section class="features">
+      <section class="features" id="features">
         <div class="feature-card">
           <div class="feature-icon">☁️</div>
-          <h3>Amazon S3</h3>
-          <p>Private S3 bucket hosts static files securely as the CloudFront origin.</p>
+          <h3>Amazon S3 (Private)</h3>
+          <p>Static files are stored securely. Public access is blocked to protect the origin.</p>
+          <ul class="mini-list">
+            <li>Private bucket</li>
+            <li>Versioning-ready</li>
+            <li>Origin-only access</li>
+          </ul>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
           <h3>CloudFront CDN</h3>
-          <p>Global edge locations cache content for low latency and high availability.</p>
+          <p>CloudFront caches content at the edge to improve performance worldwide.</p>
+          <ul class="mini-list">
+            <li>Edge caching</li>
+            <li>HTTPS by default</li>
+            <li>Low latency</li>
+          </ul>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">🔒</div>
-          <h3>Secure by Design</h3>
-          <p>Origin Access Control (OAC) ensures S3 is never publicly exposed.</p>
+          <h3>OAC + Bucket Policy</h3>
+          <p>Only CloudFront can read objects from S3. Users never hit the bucket directly.</p>
+          <ul class="mini-list">
+            <li>Origin Access Control</li>
+            <li>Locked-down S3 origin</li>
+            <li>Reduced attack surface</li>
+          </ul>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">🏗️</div>
           <h3>Terraform IaC</h3>
-          <p>Infrastructure is fully automated, repeatable, and version-controlled.</p>
+          <p>Infrastructure is created from code, making builds consistent and auditable.</p>
+          <ul class="mini-list">
+            <li>Repeatable deployments</li>
+            <li>Simple updates</li>
+            <li>Tagging + structure</li>
+          </ul>
         </div>
       </section>
 
       <!-- Demo -->
-      <section class="demo-section">
+      <section class="demo-section" id="demo">
         <h2>Interactive Demo</h2>
+        <p class="section-subtitle">
+          Small UI actions to show that JavaScript and styling are being served correctly through CloudFront.
+        </p>
 
         <div class="demo-controls">
-          <button id="themeButton" class="btn btn-primary">Toggle Theme</button>
+          <!-- MUST match script.js -->
+          <button id="colorButton" class="btn btn-primary">Dark Theme</button>
           <button id="counterButton" class="btn btn-secondary">
             Click Counter: <span id="counter">0</span>
           </button>
@@ -64,11 +120,25 @@
           <span class="status-dot"></span>
           <span>Website Status: <strong id="status">Optimized</strong></span>
         </div>
+
+        <div class="tips">
+          <div class="tip-card">
+            <div class="tip-title">Keyboard Shortcuts</div>
+            <p><strong>Space</strong> = Counter • <strong>T</strong> = Theme</p>
+          </div>
+          <div class="tip-card">
+            <div class="tip-title">Cache Behavior</div>
+            <p>CloudFront serves cached content from the closest edge location.</p>
+          </div>
+        </div>
       </section>
 
       <!-- Architecture -->
-      <section class="info-section">
+      <section class="info-section" id="architecture">
         <h2>Architecture Overview</h2>
+        <p class="section-subtitle">
+          A clean, secure flow: users hit CloudFront first, and CloudFront fetches from a private S3 origin only when needed.
+        </p>
 
         <div class="architecture">
           <div class="arch-step">
@@ -80,7 +150,7 @@
 
           <div class="arch-step">
             <span class="step-number">2</span>
-            <p>CloudFront Edge</p>
+            <p>CloudFront Edge Cache</p>
           </div>
 
           <div class="arch-arrow">→</div>
@@ -90,14 +160,44 @@
             <p>Private S3 Origin</p>
           </div>
         </div>
+
+        <div class="checklist">
+          <h3>What This Design Achieves</h3>
+          <ul>
+            <li><strong>Fast:</strong> Edge caching reduces load time.</li>
+            <li><strong>Secure:</strong> S3 stays private using OAC + bucket policy.</li>
+            <li><strong>Simple:</strong> No servers to manage.</li>
+            <li><strong>Repeatable:</strong> Terraform rebuilds the same stack anytime.</li>
+          </ul>
+        </div>
       </section>
+
+      <!-- Next Steps -->
+      <section class="info-section" id="next">
+        <h2>Next Improvements</h2>
+        <p class="section-subtitle">Easy upgrades you can add to level this up even more.</p>
+
+        <div class="next-steps">
+          <div class="next-card">
+            <h3>Custom Domain + HTTPS</h3>
+            <p>Use Route 53 + ACM to serve your site from a real domain.</p>
+          </div>
+          <div class="next-card">
+            <h3>Cache Invalidation</h3>
+            <p>Invalidate CloudFront cache when you deploy new files.</p>
+          </div>
+          <div class="next-card">
+            <h3>Security Headers</h3>
+            <p>Add strict headers for safer browsing and better security posture.</p>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <!-- Footer -->
     <footer class="footer">
-      <p>
-        © 2025 AWS Static Website Demo • Built with ❤️ using Terraform
-      </p>
+      <p>© 2025 AWS Static Website Demo • Built with ❤️ using Terraform</p>
     </footer>
 
   </div>
