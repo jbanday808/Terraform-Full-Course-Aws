@@ -284,3 +284,46 @@ body.dark-theme {
         transform: rotate(90deg);
     }
 }
+
+/* Button feedback */
+.btn.pressed {
+  transform: scale(0.95);
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--secondary-color);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInOut 2s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+/* Dark Theme Enhancements */
+body.dark-theme {
+  --bg-color: #1f2937;
+  --card-bg: #374151;
+  --text-color: #f9fafb;
+  --text-light: #d1d5db;
+  --border-color: #4b5563;
+
+  background: linear-gradient(135deg, #111827, #020617);
+}
+
+/* Footer refinement */
+.footer {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
