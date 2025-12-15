@@ -40,43 +40,43 @@ body {
   padding: 2rem;
 }
 
-/* =========================
-   Hero Section
-========================= */
+
+/* ===== Hero Alignment Fix ===== */
 .hero {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: var(--bg-color);
-  border-radius: 20px;
-  margin-bottom: 3rem;
-  box-shadow: var(--shadow-lg);
+  padding: 3.5rem 2.5rem;          /* tighter vertical padding */
+}
+
+.hero > * {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hero-title {
-  font-size: 3.4rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .hero-subtitle {
-  font-size: 1.35rem;
-  color: var(--text-light);
-  font-weight: 400;
+  max-width: 900px;
+  margin: 0 auto 1.75rem;          /* centers + adds spacing above buttons */
+  text-align: center;
 }
 
-/* =========================
-   Content Wrapper
-========================= */
-.content {
-  background: var(--bg-color);
-  border-radius: 20px;
-  padding: 3rem;
-  margin-bottom: 2.5rem;
-  box-shadow: var(--shadow-lg);
+/* Button group spacing */
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
 }
+
+/* Prevent visual drift on wide screens */
+@media (min-width: 1200px) {
+  .hero {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
 
 /* =========================
    Project Summary (Refined)
