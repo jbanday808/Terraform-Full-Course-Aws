@@ -67,13 +67,13 @@ variable "instance_type" {
 ########################
 
 variable "primary_key_name" {
-  description = "SSH key pair name for EC2 in the primary region"
+  description = "SSH key pair name for EC2 in the primary region (us-east-1)"
   type        = string
-  default     = ""
+  default     = "vpc-peering-demo-east"
 }
 
 variable "secondary_key_name" {
-  description = "SSH key pair name for EC2 in the secondary region"
+  description = "SSH key pair name for EC2 in the secondary region (us-west-2)"
   type        = string
-  default     = ""
+  default     = "vpc-peering-demo-west"
 }
