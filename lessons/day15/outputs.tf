@@ -88,17 +88,21 @@ output "secondary_instance_public_ip" {
 # VALIDATION — TEST COMMANDS
 ########################
 
-output "test_connectivity_command" {
-  description = "Quick steps to validate VPC peering (ping over private IPs)"
+output "test_connectivity_commands" {
+  description = "Commands to validate VPC peering and SSH access"
   value       = <<-EOT
-    Test VPC Peering (Private IP Ping)
+    Test VPC Peering Connectivity (Private IP)
 
-    Option A (from Primary → Secondary):
-    1) SSH:  ssh -i your-key.pem ubuntu@${aws_instance.primary_instance.public_ip}
-    2) Ping: ping ${aws_instance.secondary_instance.private_ip}
+    Primary → Secondary
+    SSH:
+      ssh -i ~/.ssh/vpc-peering-demo-east.pem ubuntu@${aws_instance.primary_instance.public_ip}
+    Ping:
+      ping ${aws_instance.secondary_instance.private_ip}
 
-    Option B (from Secondary → Primary):
-    1) SSH:  ssh -i your-key.pem ubuntu@${aws_instance.secondary_instance.public_ip}
-    2) Ping: ping ${aws_instance.primary_instance.private_ip}
+    Secondary → Primary
+    SSH:
+      ssh -i ~/.ssh/vpc-peering-demo-west.pem ubuntu@${aws_instance.secondary_instance.public_ip}
+    Ping:
+      ping ${aws_instance.primary_instance.private_ip}
   EOT
 }
