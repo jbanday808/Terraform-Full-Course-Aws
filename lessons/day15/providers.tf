@@ -1,7 +1,7 @@
 #############################################
-# PROVIDERS.TF — Terraform & AWS Providers
-# Defines Terraform versioning and AWS
-# provider configuration
+# PROVIDERS.TF — Multi-Region AWS Providers
+# Sets up two AWS providers (Primary + Secondary)
+# for cross-region VPC peering deployments
 #############################################
 
 ########################
@@ -20,9 +20,33 @@ terraform {
 }
 
 ########################
-# AWS PROVIDER
+# AWS PROVIDERS (ALIASES)
 ########################
 
+# Primary Region Provider (us-east-1)
 provider "aws" {
-  region = var.region
+  alias  = "primary"
+  region = var.primary_region
+
+  default_tags {
+    tags = {
+      Environment = "Demo"
+      Project     = "VPC-Peering-Demo"
+      RegionRole  = "Primary"
+    }
+  }
+}
+
+# Secondary Region Provider (us-west-2)
+provider "aws" {
+  alias  = "secondary"
+  region = var.secondary_region
+
+  default_tags {
+    tags = {
+      Environment = "Demo"
+      Project     = "VPC-Peering-Demo"
+      RegionRole  = "Secondary"
+    }
+  }
 }
