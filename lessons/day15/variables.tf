@@ -1,55 +1,79 @@
-# Variables for VPC Peering Demo
+#############################################
+# VARIABLES.TF — Input Variables (Labeled)
+# Centralized configuration for regions,
+# networking, and compute resources
+#############################################
+
+########################
+# REGIONS
+########################
 
 variable "primary_region" {
-  description = "Primary AWS region for the first VPC"
+  description = "AWS region hosting the primary VPC"
   type        = string
   default     = "us-east-1"
 }
 
 variable "secondary_region" {
-  description = "Secondary AWS region for the second VPC"
+  description = "AWS region hosting the secondary VPC"
   type        = string
   default     = "us-west-2"
 }
 
+########################
+# NETWORKING — VPC CIDRs
+########################
+
 variable "primary_vpc_cidr" {
-  description = "CIDR block for the primary VPC"
+  description = "CIDR range for the primary VPC"
   type        = string
   default     = "10.0.0.0/16"
 }
 
 variable "secondary_vpc_cidr" {
-  description = "CIDR block for the secondary VPC"
+  description = "CIDR range for the secondary VPC"
   type        = string
   default     = "10.1.0.0/16"
 }
 
+########################
+# NETWORKING — SUBNET CIDRs
+########################
+
 variable "primary_subnet_cidr" {
-  description = "CIDR block for the primary subnet"
+  description = "CIDR range for the primary subnet"
   type        = string
   default     = "10.0.1.0/24"
 }
 
 variable "secondary_subnet_cidr" {
-  description = "CIDR block for the secondary subnet"
+  description = "CIDR range for the secondary subnet"
   type        = string
   default     = "10.1.1.0/24"
 }
 
+########################
+# COMPUTE — EC2 SETTINGS
+########################
+
 variable "instance_type" {
-  description = "EC2 instance type"
+  description = "EC2 instance type used in both VPCs"
   type        = string
   default     = "t2.micro"
 }
 
+########################
+# ACCESS — SSH KEY PAIRS
+########################
+
 variable "primary_key_name" {
-  description = "Name of the SSH key pair for Primary VPC instance (us-east-1)"
+  description = "SSH key pair name for EC2 in the primary region"
   type        = string
   default     = ""
 }
 
 variable "secondary_key_name" {
-  description = "Name of the SSH key pair for Secondary VPC instance (us-west-2)"
+  description = "SSH key pair name for EC2 in the secondary region"
   type        = string
   default     = ""
 }
