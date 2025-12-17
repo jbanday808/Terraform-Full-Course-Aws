@@ -1,22 +1,46 @@
-# Data Sources for VPC Peering Demo
+#############################################
+# DATA.TF — Data Sources (Labeled)
+# Centralized lookups for AZs and AMIs used
+# across the VPC Peering demo
+#############################################
 
-# Data source to get available AZs in Primary region
+########################
+# AVAILABILITY ZONES
+########################
+
+# Primary Region — Available AZs
 data "aws_availability_zones" "primary" {
   provider = aws.primary
   state    = "available"
+
+  tags = {
+    Purpose = "AZ-Lookup"
+    Region  = "Primary"
+    Scope   = "VPC-Peering-Demo"
+  }
 }
 
-# Data source to get available AZs in Secondary region
+# Secondary Region — Available AZs
 data "aws_availability_zones" "secondary" {
   provider = aws.secondary
   state    = "available"
+
+  tags = {
+    Purpose = "AZ-Lookup"
+    Region  = "Secondary"
+    Scope   = "VPC-Peering-Demo"
+  }
 }
 
-# Data source for Primary region AMI (Ubuntu 24.04 LTS)
+########################
+# AMAZON MACHINE IMAGES
+########################
+
+# Primary Region — Ubuntu 24.04 LTS AMI
 data "aws_ami" "primary_ami" {
   provider    = aws.primary
   most_recent = true
-  owners      = ["099720109477"] # Canonical (Ubuntu)
+  owners      = ["099720109477"] # Canonical
 
   filter {
     name   = "name"
@@ -31,14 +55,21 @@ data "aws_ami" "primary_ami" {
   filter {
     name   = "architecture"
     values = ["x86_64"]
+  }
+
+  tags = {
+    OS          = "Ubuntu-24.04-LTS"
+    Region      = "Primary"
+    Purpose     = "EC2-AMI-Lookup"
+    Environment = "Demo"
   }
 }
 
-# Data source for Secondary region AMI (Ubuntu 24.04 LTS)
+# Secondary Region — Ubuntu 24.04 LTS AMI
 data "aws_ami" "secondary_ami" {
   provider    = aws.secondary
   most_recent = true
-  owners      = ["099720109477"] # Canonical (Ubuntu)
+  owners      = ["099720109477"] # Canonical
 
   filter {
     name   = "name"
@@ -53,5 +84,12 @@ data "aws_ami" "secondary_ami" {
   filter {
     name   = "architecture"
     values = ["x86_64"]
+  }
+
+  tags = {
+    OS          = "Ubuntu-24.04-LTS"
+    Region      = "Secondary"
+    Purpose     = "EC2-AMI-Lookup"
+    Environment = "Demo"
   }
 }
