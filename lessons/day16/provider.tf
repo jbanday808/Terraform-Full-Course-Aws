@@ -1,28 +1,11 @@
 #############################################
-# Provider Configuration (provider.tf)
-# Purpose: Define Terraform and AWS provider
-#          requirements and default region.
+# AWS Provider Configuration (provider.tf)
+# Purpose: Define the default AWS provider
+#          and region for all resources.
 #############################################
 
 #############################
-# 1) Terraform Settings
-#############################
-
-terraform {
-  # LABEL: Required provider definitions
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws" # LABEL: AWS provider source
-      version = "~> 5.0"        # LABEL: AWS provider version constraint
-    }
-  }
-
-  # LABEL: Minimum supported Terraform version
-  required_version = ">= 1.0"
-}
-
-#############################
-# 2) AWS Provider
+# 1) AWS Provider
 #############################
 
 # LABEL: Global AWS provider configuration
