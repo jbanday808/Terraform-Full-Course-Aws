@@ -1,110 +1,149 @@
 #!/bin/bash
 
-# Script to perform the Blue-Green swap
+#############################################
+# Script: package-apps.sh
+# Purpose: Perform Elastic Beanstalk
+#          Blue-Green environment CNAME swap
+#############################################
 
-# Default values
+#############################################
+# Default Configuration
+#############################################
+
 REGION="us-east-1"
 BLUE_ENV=""
 GREEN_ENV=""
 
-# Parse command line arguments
+#############################################
+# Command-Line Argument Parsing
+#############################################
+
 while [[ $# -gt 0 ]]; do
-    case $1 in
-        --region)
-            REGION="$2"
-            shift 2
-            ;;
-        --blue)
-            BLUE_ENV="$2"
-            shift 2
-            ;;
-        --green)
-            GREEN_ENV="$2"
-            shift 2
-            ;;
-        *)
-            echo "Unknown option: $1"
-            echo "Usage: $0 [--region REGION] [--blue BLUE_ENV] [--green GREEN_ENV]"
-            exit 1
-            ;;
-    esac
+  case $1 in
+    --region)
+      REGION="$2"
+      shift 2
+      ;;
+    --blue)
+      BLUE_ENV="$2"
+      shift 2
+      ;;
+    --green)
+      GREEN_ENV="$2"
+      shift 2
+      ;;
+    *)
+      echo "[ERROR] Unknown option: $1"
+      echo "Usage: $0 [--region REGION] [--blue BLUE_ENV] [--green GREEN_ENV]"
+      exit 1
+      ;;
+  esac
 done
+
+#############################################
+# Script Header
+#############################################
 
 echo "====================================="
 echo "Blue-Green Environment Swap"
 echo "====================================="
 echo ""
 
-# Get environment names from Terraform output if not provided
+#############################################
+# Retrieve Environment Names from Terraform
+#############################################
+
 if [ -z "$BLUE_ENV" ] || [ -z "$GREEN_ENV" ]; then
-    echo "Getting environment names from Terraform..."
-    
-    if ! command -v terraform &> /dev/null; then
-        echo "[ERROR] Terraform is not installed or not in PATH"
-        exit 1
-    fi
-    
-    if ! command -v jq &> /dev/null; then
-        echo "[ERROR] jq is not installed. Please install jq to parse JSON output."
-        echo "On Ubuntu/Debian: sudo apt-get install jq"
-        echo "On macOS: brew install jq"
-        exit 1
-    fi
-    
-    TF_OUTPUT=$(terraform output -json 2>&1)
-    if [ $? -ne 0 ]; then
-        echo "[ERROR] Could not read Terraform outputs."
-        echo "   Please run 'terraform apply' first or provide environment names manually."
-        exit 1
-    fi
-    
-    BLUE_ENV=$(echo "$TF_OUTPUT" | jq -r '.blue_environment_name.value')
-    GREEN_ENV=$(echo "$TF_OUTPUT" | jq -r '.green_environment_name.value')
-    
-    echo "[SUCCESS] Found environments:"
-    echo "   Blue (Production): $BLUE_ENV"
-    echo "   Green (Staging): $GREEN_ENV"
+  echo "Retrieving environment names from Terraform outputs..."
+
+  # Validate Terraform installation
+  if ! command -v terraform &> /dev/null; then
+    echo "[ERROR] Terraform is not installed or not in PATH"
+    exit 1
+  fi
+
+  # Validate jq installation
+  if ! command -v jq &> /dev/null; then
+    echo "[ERROR] jq is not installed (required for JSON parsing)"
+    echo "  Ubuntu/Debian: sudo apt-get install jq"
+    echo "  macOS: brew install jq"
+    exit 1
+  fi
+
+  # Fetch Terraform outputs
+  TF_OUTPUT=$(terraform output -json 2>&1)
+  if [ $? -ne 0 ]; then
+    echo "[ERROR] Unable to read Terraform outputs"
+    echo "  Run 'terraform apply' first or provide environment names manually"
+    exit 1
+  fi
+
+  BLUE_ENV=$(echo "$TF_OUTPUT" | jq -r '.blue_environment_name.value')
+  GREEN_ENV=$(echo "$TF_OUTPUT" | jq -r '.green_environment_name.value')
+
+  echo "[SUCCESS] Environments detected:"
+  echo "  Blue  (Production): $BLUE_ENV"
+  echo "  Green (Staging):    $GREEN_ENV"
 fi
 
+#############################################
+# User Confirmation
+#############################################
+
 echo ""
-echo "[WARNING] This will swap the CNAMEs of both environments!"
-echo "   Production traffic will be redirected to the staging environment."
+echo "[WARNING] This action will swap environment CNAMEs."
+echo "  Production traffic will be redirected to the Green environment."
 echo ""
 echo "Press any key to continue or Ctrl+C to cancel..."
 read -n 1 -s
 
-echo ""
-echo "Swapping environment CNAMEs..."
+#############################################
+# Execute Blue-Green Swap
+#############################################
 
-# Perform the swap
+echo ""
+echo "Initiating environment swap..."
+
+# Validate AWS CLI installation
 if ! command -v aws &> /dev/null; then
-    echo "[ERROR] AWS CLI is not installed or not in PATH"
-    exit 1
+  echo "[ERROR] AWS CLI is not installed or not in PATH"
+  exit 1
 fi
 
+# Perform Elastic Beanstalk CNAME swap
 if aws elasticbeanstalk swap-environment-cnames \
-    --source-environment-name "$BLUE_ENV" \
-    --destination-environment-name "$GREEN_ENV" \
-    --region "$REGION" 2>&1; then
-    
-    echo ""
-    echo "====================================="
-    echo "[SUCCESS] Swap initiated successfully!"
-    echo "====================================="
-    echo ""
-    echo "[INFO] The swap typically takes 1-2 minutes to complete."
-    echo ""
-    echo "You can verify the swap by:"
-    echo "1. Checking the Elastic Beanstalk console"
-    echo "2. Visiting the environment URLs (wait a few minutes)"
-    echo "3. Running: terraform output instructions"
+  --source-environment-name "$BLUE_ENV" \
+  --destination-environment-name "$GREEN_ENV" \
+  --region "$REGION" 2>&1; then
+
+  ###########################################
+  # Swap Success
+  ###########################################
+
+  echo ""
+  echo "====================================="
+  echo "[SUCCESS] Blue-Green swap initiated!"
+  echo "====================================="
+  echo ""
+  echo "[INFO] The swap typically completes within 1–2 minutes."
+  echo ""
+  echo "Verification steps:"
+  echo "1. Check the Elastic Beanstalk console"
+  echo "2. Visit the environment URLs after a short wait"
+  echo "3. Run: terraform output instructions"
+
 else
-    echo ""
-    echo "[ERROR] Error performing swap"
-    echo ""
-    echo "Troubleshooting:"
-    echo "1. Ensure AWS CLI is configured correctly"
-    echo "2. Verify both environments are healthy"
-    echo "3. Check that no other operation is in progress"
-    exit 1
+
+  ###########################################
+  # Swap Failure
+  ###########################################
+
+  echo ""
+  echo "[ERROR] Swap failed"
+  echo ""
+  echo "Troubleshooting steps:"
+  echo "1. Verify AWS CLI credentials and permissions"
+  echo "2. Ensure both environments are healthy"
+  echo "3. Confirm no other Elastic Beanstalk operation is running"
+  exit 1
 fi
