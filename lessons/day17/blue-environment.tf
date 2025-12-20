@@ -1,4 +1,8 @@
-# Application Version 1.0 (Blue Environment - Production)
+#############################################
+# Application Version 1.0 (Blue - Production)
+#############################################
+
+# Upload Application Artifact to S3
 resource "aws_s3_object" "app_v1" {
   bucket = aws_s3_bucket.app_versions.id
   key    = "app-v1.zip"
@@ -8,17 +12,21 @@ resource "aws_s3_object" "app_v1" {
   tags = var.tags
 }
 
+# Register Elastic Beanstalk Application Version
 resource "aws_elastic_beanstalk_application_version" "v1" {
   name        = "${var.app_name}-v1"
   application = aws_elastic_beanstalk_application.app.name
-  description = "Application Version 1.0 - Initial Release"
+  description = "Application Version 1.0 - Blue Environment (Production)"
   bucket      = aws_s3_bucket.app_versions.id
   key         = aws_s3_object.app_v1.id
 
   tags = var.tags
 }
 
+#############################################
 # Blue Environment (Production)
+#############################################
+
 resource "aws_elastic_beanstalk_environment" "blue" {
   name                = "${var.app_name}-blue"
   application         = aws_elastic_beanstalk_application.app.name
@@ -26,7 +34,9 @@ resource "aws_elastic_beanstalk_environment" "blue" {
   tier                = "WebServer"
   version_label       = aws_elastic_beanstalk_application_version.v1.name
 
-  # IAM Settings
+  ###########################################
+  # IAM Configuration
+  ###########################################
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
@@ -39,14 +49,18 @@ resource "aws_elastic_beanstalk_environment" "blue" {
     value     = aws_iam_role.eb_service_role.name
   }
 
-  # Instance Settings
+  ###########################################
+  # EC2 Instance Configuration
+  ###########################################
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "InstanceType"
     value     = var.instance_type
   }
 
-  # Environment Type (Load Balanced)
+  ###########################################
+  # Load Balancer Configuration
+  ###########################################
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "EnvironmentType"
@@ -59,7 +73,9 @@ resource "aws_elastic_beanstalk_environment" "blue" {
     value     = "application"
   }
 
-  # Auto Scaling Settings
+  ###########################################
+  # Auto Scaling Configuration
+  ###########################################
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MinSize"
@@ -72,14 +88,18 @@ resource "aws_elastic_beanstalk_environment" "blue" {
     value     = "2"
   }
 
-  # Health Reporting
+  ###########################################
+  # Health Monitoring
+  ###########################################
   setting {
     namespace = "aws:elasticbeanstalk:healthreporting:system"
     name      = "SystemType"
     value     = "enhanced"
   }
 
-  # Platform Settings
+  ###########################################
+  # Application Process Settings
+  ###########################################
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:default"
     name      = "HealthCheckPath"
@@ -98,7 +118,9 @@ resource "aws_elastic_beanstalk_environment" "blue" {
     value     = "HTTP"
   }
 
-  # Environment Variables
+  ###########################################
+  # Application Environment Variables
+  ###########################################
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "ENVIRONMENT"
@@ -111,7 +133,9 @@ resource "aws_elastic_beanstalk_environment" "blue" {
     value     = "1.0"
   }
 
-  # Deployment Policy
+  ###########################################
+  # Deployment Strategy
+  ###########################################
   setting {
     namespace = "aws:elasticbeanstalk:command"
     name      = "DeploymentPolicy"
@@ -130,18 +154,24 @@ resource "aws_elastic_beanstalk_environment" "blue" {
     value     = "50"
   }
 
-  # Managed Updates
+  ###########################################
+  # Managed Platform Updates
+  ###########################################
   setting {
     namespace = "aws:elasticbeanstalk:managedactions"
     name      = "ManagedActionsEnabled"
     value     = "false"
   }
 
+  ###########################################
+  # Resource Tags
+  ###########################################
   tags = merge(
     var.tags,
     {
       Environment = "blue"
       Role        = "production"
+      Deployment  = "blue-green"
     }
   )
 }
