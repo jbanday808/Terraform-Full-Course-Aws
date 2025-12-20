@@ -1,77 +1,109 @@
-# Script to perform the Blue-Green swap
+#############################################
+# Script: swap-environment.ps1
+# Purpose: Perform Elastic Beanstalk
+#          Blue-Green environment CNAME swap
+#############################################
+
+#############################################
+# Script Parameters
+#############################################
 
 param(
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$Region = "us-east-1",
-    
-    [Parameter(Mandatory=$false)]
+
+    [Parameter(Mandatory = $false)]
     [string]$BlueEnv = "",
-    
-    [Parameter(Mandatory=$false)]
+
+    [Parameter(Mandatory = $false)]
     [string]$GreenEnv = ""
 )
+
+#############################################
+# Script Header
+#############################################
 
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host "Blue-Green Environment Swap" -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Get environment names from Terraform output if not provided
+#############################################
+# Retrieve Environment Names from Terraform
+#############################################
+
 if ([string]::IsNullOrEmpty($BlueEnv) -or [string]::IsNullOrEmpty($GreenEnv)) {
-    Write-Host "Getting environment names from Terraform..." -ForegroundColor Yellow
-    
+    Write-Host "Retrieving environment names from Terraform outputs..." -ForegroundColor Yellow
+
     try {
         $tfOutput = terraform output -json | ConvertFrom-Json
-        $BlueEnv = $tfOutput.blue_environment_name.value
+        $BlueEnv  = $tfOutput.blue_environment_name.value
         $GreenEnv = $tfOutput.green_environment_name.value
-        
-        Write-Host "[SUCCESS] Found environments:" -ForegroundColor Green
-        Write-Host "   Blue (Production): $BlueEnv" -ForegroundColor Blue
-        Write-Host "   Green (Staging): $GreenEnv" -ForegroundColor Green
-    } catch {
-        Write-Host "[ERROR] Could not read Terraform outputs." -ForegroundColor Red
-        Write-Host "   Please run 'terraform apply' first or provide environment names manually." -ForegroundColor Yellow
+
+        Write-Host "[SUCCESS] Environments detected:" -ForegroundColor Green
+        Write-Host "  Blue  (Production): $BlueEnv" -ForegroundColor Blue
+        Write-Host "  Green (Staging):    $GreenEnv" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "[ERROR] Unable to read Terraform outputs." -ForegroundColor Red
+        Write-Host "  Run 'terraform apply' first or provide environment names manually." -ForegroundColor Yellow
         exit 1
     }
 }
 
+#############################################
+# User Confirmation
+#############################################
+
 Write-Host ""
-Write-Host "[WARNING] This will swap the CNAMEs of both environments!" -ForegroundColor Yellow
-Write-Host "   Production traffic will be redirected to the staging environment." -ForegroundColor Yellow
+Write-Host "[WARNING] This action will swap environment CNAMEs." -ForegroundColor Yellow
+Write-Host "  Production traffic will be redirected to the Green environment." -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Press any key to continue or Ctrl+C to cancel..." -ForegroundColor Cyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
-Write-Host ""
-Write-Host "Swapping environment CNAMEs..." -ForegroundColor Yellow
+#############################################
+# Execute Blue-Green Swap
+#############################################
 
-# Perform the swap
+Write-Host ""
+Write-Host "Initiating environment swap..." -ForegroundColor Yellow
+
 try {
     aws elasticbeanstalk swap-environment-cnames `
         --source-environment-name $BlueEnv `
         --destination-environment-name $GreenEnv `
         --region $Region
-    
+
+    #########################################
+    # Swap Success
+    #########################################
+
     Write-Host ""
     Write-Host "=====================================" -ForegroundColor Cyan
-    Write-Host "[SUCCESS] Swap initiated successfully!" -ForegroundColor Green
+    Write-Host "[SUCCESS] Blue-Green swap initiated!" -ForegroundColor Green
     Write-Host "=====================================" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "[INFO] The swap typically takes 1-2 minutes to complete." -ForegroundColor Yellow
+    Write-Host "[INFO] The swap typically completes within 1–2 minutes." -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "You can verify the swap by:" -ForegroundColor Cyan
-    Write-Host "1. Checking the Elastic Beanstalk console" -ForegroundColor White
-    Write-Host "2. Visiting the environment URLs (wait a few minutes)" -ForegroundColor White
-    Write-Host "3. Running: terraform output instructions" -ForegroundColor White
-    
-} catch {
+    Write-Host "Verification steps:" -ForegroundColor Cyan
+    Write-Host "1. Check the Elastic Beanstalk console" -ForegroundColor White
+    Write-Host "2. Visit the environment URLs after a short wait" -ForegroundColor White
+    Write-Host "3. Run: terraform output instructions" -ForegroundColor White
+}
+catch {
+
+    #########################################
+    # Swap Failure
+    #########################################
+
     Write-Host ""
-    Write-Host "[ERROR] Error performing swap:" -ForegroundColor Red
+    Write-Host "[ERROR] Swap failed" -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
     Write-Host ""
-    Write-Host "Troubleshooting:" -ForegroundColor Yellow
-    Write-Host "1. Ensure AWS CLI is configured correctly" -ForegroundColor White
-    Write-Host "2. Verify both environments are healthy" -ForegroundColor White
-    Write-Host "3. Check that no other operation is in progress" -ForegroundColor White
+    Write-Host "Troubleshooting steps:" -ForegroundColor Yellow
+    Write-Host "1. Verify AWS CLI credentials and permissions" -ForegroundColor White
+    Write-Host "2. Ensure both environments are healthy" -ForegroundColor White
+    Write-Host "3. Confirm no other Elastic Beanstalk operation is running" -ForegroundColor White
     exit 1
 }
