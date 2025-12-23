@@ -35,6 +35,27 @@ resource "aws_elastic_beanstalk_environment" "blue" {
   version_label       = aws_elastic_beanstalk_application_version.v1.name
 
   ###########################################
+  # VPC Configuration (No Default VPC Fix)
+  ###########################################
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "VPCId"
+    value     = aws_vpc.eb_vpc.id
+  }
+
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "Subnets"
+    value     = join(",", [aws_subnet.public_a.id, aws_subnet.public_b.id])
+  }
+
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "ELBSubnets"
+    value     = join(",", [aws_subnet.public_a.id, aws_subnet.public_b.id])
+  }
+
+  ###########################################
   # IAM Configuration
   ###########################################
   setting {
