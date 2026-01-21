@@ -3,7 +3,11 @@ name: Terraform Drift Detection
 on:
   schedule:
     - cron: '0 8 * * *' # Runs every day at 8am UTC
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
 
 env:
   AWS_REGION: us-east-1
@@ -19,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -29,7 +33,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.5.0
           terraform_wrapper: false
@@ -39,59 +43,64 @@ jobs:
 
       - name: Terraform Plan (Drift Detection)
         id: plan
+        shell: bash
         run: |
+          set +e
           terraform plan -detailed-exitcode -no-color > plan_output.txt 2>&1
-        continue-on-error: true
+          exitcode=$?
+          echo "exitcode=$exitcode" >> "$GITHUB_OUTPUT"
+          exit 0
 
-      - name: Analyze Drift
-        if: steps.plan.outputs.exitcode == 2
-        uses: actions/github-script@v6
+      - name: Analyze Drift (Create GitHub Issue)
+        if: steps.plan.outputs.exitcode == '2'
+        uses: actions/github-script@v7
         env:
-          PLAN_OUTPUT: plan_output.txt
+          PLAN_OUTPUT: ${{ env.TF_WORKING_DIR }}/plan_output.txt
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const planOutput = fs.readFileSync(process.env.PLAN_OUTPUT, 'utf8');
+
             const body = `### Drift Detected
-            
-            Terraform has detected changes in the infrastructure that are not in the state file.
-            
+
+            Terraform found changes that are not reflected in your code/state.
+
             <details>
             <summary>Show Plan</summary>
-            
+
             \`\`\`terraform
             ${planOutput.slice(0, 65000)}
             \`\`\`
-            
+
             </details>
-            
-            Please review the changes and apply them or update the code.`;
-            
+
+            Please review and apply, or update the Terraform code.`;
+
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: '🚨 Terraform Drift Detected',
-              body: body
+              body
             });
-            
+
             core.setFailed('Drift detected! Infrastructure state does not match configuration.');
 
       - name: Publish Drift Summary
-        if: steps.plan.outputs.exitcode == 2
+        if: steps.plan.outputs.exitcode == '2'
         run: |
           echo "### 🚨 Drift Detected" >> $GITHUB_STEP_SUMMARY
-          echo "Terraform has detected changes. Please check the [logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) or the newly created issue." >> $GITHUB_STEP_SUMMARY
+          echo "Terraform detected changes. Review the run logs or the created issue." >> $GITHUB_STEP_SUMMARY
 
       - name: No Drift
-        if: steps.plan.outputs.exitcode == 0
+        if: steps.plan.outputs.exitcode == '0'
         run: |
-          echo "No drift detected. Infrastructure is in sync."
           echo "### ✅ No Drift Detected" >> $GITHUB_STEP_SUMMARY
           echo "Infrastructure is in sync with the configuration." >> $GITHUB_STEP_SUMMARY
 
       - name: Terraform Plan Failure
-        if: steps.plan.outputs.exitcode == 1
+        if: steps.plan.outputs.exitcode == '1'
         run: |
-          echo "::error::Terraform plan failed."
+          echo "::error::Terraform plan failed. Check plan_output.txt in logs."
+          cat plan_output.txt
           exit 1
