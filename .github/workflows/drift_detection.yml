@@ -38,8 +38,8 @@ jobs:
           terraform_version: 1.5.0
           terraform_wrapper: false
 
-      - name: Terraform Init
-        run: terraform init -input=false -backend-config=bucket=tf-state-backend-dev-001 -backend-config=key=demo/terraform.tfstate -backend-config=region=us-east-1 -backend-config=dynamodb_table=terraform-state-locks -backend-config=encrypt=true
+      - name: Terraform Init (FORCED BACKEND)
+        run: terraform init -input=false -backend-config="bucket=tf-state-backend-dev-001" -backend-config="key=day30/drift/terraform.tfstate" -backend-config="region=us-east-1" -backend-config="dynamodb_table=terraform-state-locks" -backend-config="encrypt=true"
 
       - name: Terraform Plan (Drift Detection)
         id: plan
