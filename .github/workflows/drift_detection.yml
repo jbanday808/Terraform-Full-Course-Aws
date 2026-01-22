@@ -38,21 +38,8 @@ jobs:
           terraform_version: 1.5.0
           terraform_wrapper: false
 
-      - name: Verify working directory + backend file
-        run: |
-          pwd
-          ls -la
-          echo "----- backend.tf -----"
-          sed -n '1,120p' backend.tf
-
       - name: Terraform Init
-        run: |
-          terraform init -input=false \
-            -backend-config="bucket=tf-state-backend-dev-001" \
-            -backend-config="key=demo/terraform.tfstate" \
-            -backend-config="region=us-east-1" \
-            -backend-config="dynamodb_table=terraform-state-locks" \
-            -backend-config="encrypt=true"
+        run: terraform init -input=false -backend-config=bucket=tf-state-backend-dev-001 -backend-config=key=demo/terraform.tfstate -backend-config=region=us-east-1 -backend-config=dynamodb_table=terraform-state-locks -backend-config=encrypt=true
 
       - name: Terraform Plan (Drift Detection)
         id: plan
