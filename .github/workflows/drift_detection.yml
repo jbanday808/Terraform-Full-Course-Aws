@@ -39,14 +39,14 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -input=false
 
       - name: Terraform Plan (Drift Detection)
         id: plan
         shell: bash
         run: |
           set +e
-          terraform plan -detailed-exitcode -no-color > plan_output.txt 2>&1
+          terraform plan -detailed-exitcode -no-color -input=false > plan_output.txt 2>&1
           exitcode=$?
           echo "exitcode=$exitcode" >> "$GITHUB_OUTPUT"
           exit 0
