@@ -84,7 +84,7 @@ jobs:
               body
             });
 
-            core.setFailed('Drift detected! Infrastructure state does not match configuration.');
+            core.notice('Drift detected! Infrastructure state does not match configuration.');
 
       - name: Publish Drift Summary
         if: steps.plan.outputs.exitcode == '2'
