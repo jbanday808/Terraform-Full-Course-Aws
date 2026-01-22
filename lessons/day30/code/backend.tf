@@ -1,18 +1,20 @@
-# Remote State Backend Configuration
-# This file configures S3 backend for state management with S3 native locking
-# Each environment (dev/prod) will have a separate state file
-# Requires Terraform 1.10.0+ for use_lockfile support
+#############################################
+# Remote State Backend (backend.tf)
+# Purpose: Store Terraform state remotely
+#          in S3 with DynamoDB state locking.
+#############################################
+
+#############################
+# 1) Terraform Backend
+#############################
 
 terraform {
+  # LABEL: S3 backend configuration
   backend "s3" {
-    # Backend configuration will be provided via backend config file or CLI
-    # This allows different state files for dev and prod environments
-
-    # Configuration values provided at init time:
-    # bucket        = "terraform-state-bucket-name"
-    # key           = "env/terraform.tfstate"  # Will be dev or prod
-    # region        = "us-east-1"
-    # use_lockfile  = true  # S3 native state locking (Terraform 1.10.0+)
-    # encrypt       = true
+    bucket         = "tf-state-backend-dev-001" # LABEL: S3 bucket for remote state
+    key            = "demo/terraform.tfstate"   # LABEL: State file path/key
+    region         = "us-east-1"                # LABEL: AWS region (S3 & DynamoDB)
+    dynamodb_table = "terraform-state-locks"    # LABEL: State lock table
+    encrypt        = true                       # LABEL: Encrypt state at rest
   }
 }
